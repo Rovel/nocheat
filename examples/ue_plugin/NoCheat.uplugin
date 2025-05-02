@@ -1,0 +1,24 @@
+{
+  "FileVersion": 3,
+  "Version": 1,
+  "VersionName": "1.0",
+  "FriendlyName": "NoCheat",
+  "Description": "Machine learning-based anti-cheat system for multiplayer games",
+  "Category": "AntiCheat",
+  "CreatedBy": "NoCheat Team",
+  "CreatedByURL": "https://github.com/yourname/nocheat",
+  "DocsURL": "",
+  "MarketplaceURL": "",
+  "SupportURL": "",
+  "CanContainContent": true,
+  "IsBetaVersion": false,
+  "IsExperimentalVersion": false,
+  "Installed": false,
+  "Modules": [
+    {
+      "Name": "NoCheat",
+      "Type": "Runtime",
+      "LoadingPhase": "Default"
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/player-stats.schema.json",
+  "title": "PlayerStats",
+  "description": "Schema for player statistics analyzed by the NoCheat anti-cheat system",
+  "type": "object",
+  "required": ["player_id", "shots_fired", "hits", "headshots"],
+  "properties": {
+    "player_id": {
+      "type": "string",
+      "description": "Unique identifier for the player"
+    },
+    "shots_fired": {
+      "type": "object",
+      "description": "Number of shots fired per weapon type",
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 0
+      }
+    },
+    "hits": {
+      "type": "object",
+      "description": "Number of successful hits registered per weapon type",
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 0
+      }
+    },
+    "headshots": {
+      "type": "integer",
+      "description": "Total number of headshots this round",
+      "minimum": 0
+    },
+    "shot_timestamps_ms": {
+      "type": ["array", "null"],
+      "description": "Optional timestamps of shots in milliseconds since epoch (for timing analysis)",
+      "items": {
+        "type": "integer",
+        "minimum": 0
+      }
+    }
+  }
+}

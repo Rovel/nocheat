@@ -1,0 +1,19 @@
+{
+  "results": [
+    {
+      "player_id": "player123",
+      "suspicion_score": 0.23,
+      "flags": []
+    },
+    {
+      "player_id": "player456",
+      "suspicion_score": 0.45,
+      "flags": ["ModerateHeadshotRatio"]
+    },
+    {
+      "player_id": "suspicious_player789",
+      "suspicion_score": 0.92,
+      "flags": ["HighHitRate", "ExcessiveHeadshots", "AbnormalShotTiming"]
+    }
+  ]
+}

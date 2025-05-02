@@ -1,0 +1,61 @@
+[
+  {
+    "player_id": "player123",
+    "shots_fired": {
+      "rifle": 100,
+      "pistol": 35
+    },
+    "hits": {
+      "rifle": 65,
+      "pistol": 20
+    },
+    "headshots": 15,
+    "shot_timestamps_ms": [
+      1620513720123,
+      1620513720345,
+      1620513720789,
+      1620513721023,
+      1620513721456
+    ]
+  },
+  {
+    "player_id": "player456",
+    "shots_fired": {
+      "rifle": 85,
+      "sniper": 12
+    },
+    "hits": {
+      "rifle": 50,
+      "sniper": 10
+    },
+    "headshots": 18,
+    "shot_timestamps_ms": [
+      1620513720100,
+      1620513720980,
+      1620513721570,
+      1620513722045,
+      1620513723789,
+      1620513724123
+    ]
+  },
+  {
+    "player_id": "suspicious_player789",
+    "shots_fired": {
+      "rifle": 120,
+      "sniper": 20
+    },
+    "hits": {
+      "rifle": 115,
+      "sniper": 19
+    },
+    "headshots": 95,
+    "shot_timestamps_ms": [
+      1620513720123,
+      1620513720223,
+      1620513720323,
+      1620513720423,
+      1620513720523,
+      1620513720623
+    ]
+  }
+]
