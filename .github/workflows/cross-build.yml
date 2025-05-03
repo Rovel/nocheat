@@ -43,17 +43,3 @@ jobs:
           name: windows-build
           path: target/release-builds/nocheat_windows_x86_64.dll
           if-no-files-found: error
-
-      - name: Upload macOS Intel build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: macos-intel-build
-          path: target/release-builds/libnocheat_macos_x86_64.dylib
-          if-no-files-found: error
-
-      - name: Upload macOS ARM build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: macos-arm-build
-          path: target/release-builds/libnocheat_macos_arm64.dylib
-          if-no-files-found: error
