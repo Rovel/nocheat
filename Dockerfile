@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Install macOS cross-compilation tools
-RUN rustup target add x86_64-apple-darwin aarch64-apple-darwin
+# RUN rustup target add x86_64-apple-darwin aarch64-apple-darwin
 RUN rustup target add x86_64-pc-windows-gnu
 RUN rustup target add x86_64-unknown-linux-gnu x86_64-unknown-linux-musl
 

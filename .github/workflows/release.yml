@@ -29,20 +29,18 @@ jobs:
           cp target/release-builds/* release-artifacts/
           cd release-artifacts
           zip -r nocheat-${{ github.ref_name }}-windows.zip nocheat_windows_x86_64.dll
-          zip -r nocheat-${{ github.ref_name }}-linux.zip libnocheat_linux_x86_64.so
-          zip -r nocheat-${{ github.ref_name }}-macos-intel.zip libnocheat_macos_x86_64.dylib
-          zip -r nocheat-${{ github.ref_name }}-macos-arm.zip libnocheat_macos_arm64.dylib
-          zip -r nocheat-${{ github.ref_name }}-all.zip *.so *.dll *.dylib
+          zip -r nocheat-${{ github.ref_name }}-linux-dynamic.zip libnocheat_linux_x86_64.so
+          zip -r nocheat-${{ github.ref_name }}-linux-static.zip libnocheat_linux_x86_64.a
+          zip -r nocheat-${{ github.ref_name }}-all.zip *.so *.dll *.dylib *.a
 
       - name: Create Release
         id: create_release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: |
             release-artifacts/nocheat-${{ github.ref_name }}-windows.zip
-            release-artifacts/nocheat-${{ github.ref_name }}-linux.zip
-            release-artifacts/nocheat-${{ github.ref_name }}-macos-intel.zip
-            release-artifacts/nocheat-${{ github.ref_name }}-macos-arm.zip
+            release-artifacts/nocheat-${{ github.ref_name }}-linux-dynamic.zip
+            release-artifacts/nocheat-${{ github.ref_name }}-linux-static.zip
             release-artifacts/nocheat-${{ github.ref_name }}-all.zip
           draft: false
           prerelease: false
@@ -52,9 +50,8 @@ jobs:
             
             ## Binaries
             - Windows x86_64 (.dll)
-            - Linux x86_64 (.so)  
-            - macOS Intel x86_64 (.dylib)
-            - macOS ARM64/Apple Silicon (.dylib)
+            - Linux x86_64 - Dynamic Library (.so)
+            - Linux x86_64 - Static Library (.a)
             
             ## Installation
             Download the appropriate binary for your platform.
