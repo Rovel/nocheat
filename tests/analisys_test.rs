@@ -1,9 +1,8 @@
-use nocheat::types::{AnalysisResponse, PlayerStats};
+use nocheat::types::PlayerStats;
 use nocheat::{analyze_stats, build_dataframe, df_to_ndarray, generate_default_model, train_model};
 use polars::prelude::{col, DataType, IntoLazy};
 use std::collections::HashMap;
 use std::fs;
-use std::path::PathBuf;
 
 fn make_dummy_stats() -> Vec<PlayerStats> {
     let mut shots = HashMap::new();
