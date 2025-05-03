@@ -115,7 +115,7 @@ train_model(training_data, labels, "cheat_model.bin").expect("Failed to train mo
 1. Create a new plugin in your UE5 project:
    - Open your project in UE5.
    - Go to `Edit > Plugins`.
-   - Click on `New Plugin` and select `Third Party`.
+   - Click on `New Plugin` and select `Third-Party Plugin Template`.
    - Name it `NoCheat`.
 
 1. UE will create a plugin with the following directory structure in your UE project:
@@ -128,23 +128,23 @@ train_model(training_data, labels, "cheat_model.bin").expect("Failed to train mo
    │   └── NoCheat/
    │       ├── Private/
    │       │   ├── NoCheat.cpp
-   │       │   └── NoCheatManager.cpp
+   │       │   └── NoCheatManager.cpp (Not Included)
    │       ├── Public/
    │       │   ├── NoCheat.h
-   │       │   └── NoCheatManager.h
+   │       │   └── NoCheatManager.h (Not Included)
    │       └── NoCheat.Build.cs
    └── ThirdParty/
        └── NoCheatLibrary/
-           ├── include/
-           │   └── nocheat.h
+           ├── include/ (Not Included)
+           │   └── nocheat.h (Not Included)
            └── lib/
                ├── Win64/
-               │   ├── nocheat.dll
-               │   └── nocheat.lib
+               │   ├── nocheat.dll (Not Included)
+               │   └── nocheat.lib (Not Included)
                ├── Mac/
-               │   └── libnocheat.dylib
+               │   └── libnocheat.dylib (Not Included)
                └── Linux/
-                   └── libnocheat.so
+                   └── libnocheat.so (Not Included)
    ```
 
 2. Copy the compiled library to the appropriate platform folder in `ThirdParty/NoCheatLibrary/lib/`
