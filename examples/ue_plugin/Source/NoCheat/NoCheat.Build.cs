@@ -4,17 +4,11 @@ using System.IO;
 
 public class NoCheat : ModuleRules
 {
-    private string ThirdPartyPath
-    {
-        get { return Path.GetFullPath(Path.Combine(ModuleDirectory, "../../ThirdParty/")); }
-    }
-
     public NoCheat(ReadOnlyTargetRules Target) : base(Target)
     {
         PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
-        PublicIncludePaths.Add(Path.Combine(ThirdPartyPath, "NoCheatLib/include"));
-
+        // Add the NoCheatLibrary module as a dependency
         PublicDependencyModuleNames.AddRange(new string[] {
             "Core",
             "CoreUObject",
@@ -23,24 +17,11 @@ public class NoCheat : ModuleRules
             "JsonUtilities"
         });
 
-        if (Target.Platform == UnrealTargetPlatform.Win64)
-        {
-            PublicAdditionalLibraries.Add(Path.Combine(ThirdPartyPath, "NoCheatLib/lib/Win64/nocheat.lib"));
-            PublicDelayLoadDLLs.Add("nocheat.dll");
-            RuntimeDependencies.Add(Path.Combine("$(BinaryOutputDir)", "nocheat.dll"), 
-                Path.Combine(ThirdPartyPath, "NoCheatLib/lib/Win64/nocheat.dll"));
-        }
-        else if (Target.Platform == UnrealTargetPlatform.Mac)
-        {
-            PublicAdditionalLibraries.Add(Path.Combine(ThirdPartyPath, "NoCheatLib/lib/Mac/libnocheat.dylib"));
-            RuntimeDependencies.Add(Path.Combine("$(BinaryOutputDir)", "libnocheat.dylib"), 
-                Path.Combine(ThirdPartyPath, "NoCheatLib/lib/Mac/libnocheat.dylib"));
-        }
-        else if (Target.Platform == UnrealTargetPlatform.Linux)
-        {
-            PublicAdditionalLibraries.Add(Path.Combine(ThirdPartyPath, "NoCheatLib/lib/Linux/libnocheat.so"));
-            RuntimeDependencies.Add(Path.Combine("$(BinaryOutputDir)", "libnocheat.so"), 
-                Path.Combine(ThirdPartyPath, "NoCheatLib/lib/Linux/libnocheat.so"));
-        }
+        // Add the NoCheatLibrary as a private dependency
+        PrivateDependencyModuleNames.AddRange(new string[] { "NoCheatLibrary" });
+
+        // We don't need these anymore as they're handled by the NoCheatLibrary module
+        // But we do need to define the include path for header files
+        PublicIncludePaths.Add(Path.Combine(ModuleDirectory, "../../ThirdParty/NoCheatLibrary/include"));
     }
 }

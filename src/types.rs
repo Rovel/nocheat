@@ -3,7 +3,7 @@ use std::collections::HashMap;
 
 /// Represents player statistics from a game round.
 ///
-/// This structure contains all the statistics for a single player that are 
+/// This structure contains all the statistics for a single player that are
 /// needed to analyze whether the player might be cheating.
 ///
 /// # Example
@@ -15,7 +15,7 @@ use std::collections::HashMap;
 /// // Create stats for a player
 /// let mut shots = HashMap::new();
 /// shots.insert("rifle".to_string(), 100);
-/// 
+///
 /// let mut hits = HashMap::new();
 /// hits.insert("rifle".to_string(), 50);
 ///
@@ -25,11 +25,12 @@ use std::collections::HashMap;
 ///     hits: hits,
 ///     headshots: 10,
 ///     shot_timestamps_ms: None,
+///     training_label: None,
 /// };
 ///
 /// assert_eq!(player_stats.player_id, "player123");
 /// ```
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone)]
 pub struct PlayerStats {
     /// Unique identifier for the player
     pub player_id: String,
@@ -41,6 +42,9 @@ pub struct PlayerStats {
     pub headshots: u32,
     /// Optional raw shot timestamps in milliseconds (for timing analysis)
     pub shot_timestamps_ms: Option<Vec<u64>>,
+    /// Optional training label (1.0 for cheater, 0.0 for legitimate player)
+    #[serde(default)]
+    pub training_label: Option<f64>,
 }
 
 /// Analysis result for a single player.
@@ -112,7 +116,7 @@ mod tests {
         let mut shots = HashMap::new();
         shots.insert("rifle".to_string(), 100);
         shots.insert("pistol".to_string(), 20);
-        
+
         let mut hits = HashMap::new();
         hits.insert("rifle".to_string(), 50);
         hits.insert("pistol".to_string(), 15);
@@ -123,6 +127,7 @@ mod tests {
             hits: hits,
             headshots: 10,
             shot_timestamps_ms: Some(vec![100, 200, 300]),
+            training_label: None,
         };
 
         assert_eq!(stats.player_id, "player123");

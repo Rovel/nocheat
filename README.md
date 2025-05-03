@@ -4,32 +4,97 @@ NoCheat is a fast, machine learning-based anti-cheat library designed to detect 
 
 ## Features
 
-- **ML-powered detection**: Uses RandomForest classification to identify suspicious patterns
-- **Lightweight**: Small memory footprint and fast execution
-- **Language-agnostic**: C-compatible FFI interface for integration with any engine
-- **Privacy-focused**: Analyzes gameplay statistics rather than invasive system monitoring
-- **Customizable**: Easily tune detection thresholds to match your game's mechanics
+- Fast, real-time analysis of player statistics
+- Machine learning-based detection of suspicious patterns
+- Support for training custom models with your own data
+- C-compatible FFI for integration with game engines
+- UE5 plugin integration ready
+- DataFrame-based feature engineering
 
 ## How It Works
 
-NoCheat analyzes player statistics such as:
-- Hit rate (hits/shots)
-- Headshot rate (headshots/hits)
-- Shot timing patterns
+NoCheat uses a RandomForest classifier trained on player statistics to identify suspicious behavior patterns. The system:
 
-The system outputs:
-- A suspicion score for each player (0.0 to 1.0)
-- Flags for specific suspicious behaviors detected (e.g., "HighHeadshotRatio", "AimSnap")
+1. Collects player statistics (shots, hits, headshots, etc.)
+2. Extracts meaningful features (accuracy rates, headshot ratios)
+3. Passes these features to a pre-trained model
+4. Returns suspicion scores and specific behavioral flags
+
+## Training Custom Models
+
+NoCheat now includes functionality to train your own custom cheat detection models:
+
+### Option 1: Generate a Default Model
+
+The quickest way to get started is to generate a default model based on synthetic data:
+
+```rust
+use nocheat::generate_default_model;
+
+// Generate a default model with synthetic training data
+generate_default_model("cheat_model.bin").expect("Failed to generate default model");
+```
+
+This will create a model file that's ready to use for basic cheat detection.
+
+### Option 2: Train a Custom Model with Your Data
+
+For better results, you can train a model with your own labeled data:
+
+```rust
+use nocheat::{train_model};
+use nocheat::types::PlayerStats;
+use std::collections::HashMap;
+
+// Prepare your training data
+let mut training_data = Vec::new();
+let mut labels = Vec::new();
+
+// Example: Add a legitimate player
+let mut shots = HashMap::new();
+shots.insert("rifle".to_string(), 100);
+let mut hits = HashMap::new();
+hits.insert("rifle".to_string(), 50);
+
+training_data.push(PlayerStats {
+    player_id: "normal_player".to_string(),
+    shots_fired: shots.clone(),
+    hits: hits.clone(),
+    headshots: 10,
+    shot_timestamps_ms: None,
+    training_label: None,
+});
+labels.push(0.0); // Not a cheater
+
+// Example: Add a cheating player
+let mut shots = HashMap::new();
+shots.insert("rifle".to_string(), 100);
+let mut hits = HashMap::new();
+hits.insert("rifle".to_string(), 95); // Suspiciously high accuracy
+
+training_data.push(PlayerStats {
+    player_id: "cheater".to_string(),
+    shots_fired: shots,
+    hits: hits,
+    headshots: 70, // Very high headshot ratio
+    shot_timestamps_ms: None,
+    training_label: None,
+});
+labels.push(1.0); // Labeled as a cheater
+
+// Train and save model
+train_model(training_data, labels, "cheat_model.bin").expect("Failed to train model");
+```
 
 ## Integration with Unreal Engine 5
 
 ### Prerequisites
 
 - Unreal Engine 5.0 or newer
-- Visual Studio 2019 or newer
+- Visual Studio 2019 or newer (for Windows) or appropriate IDE for your platform
 - Rust 1.52.0 or newer (for building the library)
 
-### Setup as a C++ Plugin
+### Setup as a Third-Party UE5 Plugin
 
 #### Step 1: Building the NoCheat Library
 
@@ -47,35 +112,44 @@ The system outputs:
    - Linux: `target/release/libnocheat.so`
 
 #### Step 2: Creating the UE5 Plugin
+1. Create a new plugin in your UE5 project:
+   - Open your project in UE5.
+   - Go to `Edit > Plugins`.
+   - Click on `New Plugin` and select `Third-Party Plugin Template`.
+   - Name it `NoCheat`.
 
-1. Create a new C++ plugin in your UE5 project:
-   - In UE5 Editor: `Edit > Plugins > New Plugin > C++ Plugin > Module`
-   - Name it "NoCheat"
-
-2. Set up the plugin directory structure:
+1. UE will create a plugin with the following directory structure in your UE project:
    ```
    YourProject/Plugins/NoCheat/
-   ├── Source/
-   │   ├── NoCheat/
-   │   │   ├── Private/
-   │   │   ├── Public/
-   │   │   └── NoCheat.Build.cs
+   ├── NoCheat.uplugin
    ├── Resources/
-   │   └── cheat_model.bin
-   ├── ThirdParty/
-   │   └── NoCheatLib/
-   │       ├── include/
-   │       │   └── nocheat.h
-   │       └── lib/
-   │           ├── Win64/
-   │           ├── Mac/
-   │           └── Linux/
-   └── NoCheat.uplugin
+   │   └── Icon128.png
+   ├── Source/
+   │   └── NoCheat/
+   │       ├── Private/
+   │       │   ├── NoCheat.cpp
+   │       │   └── NoCheatManager.cpp (Not Included)
+   │       ├── Public/
+   │       │   ├── NoCheat.h
+   │       │   └── NoCheatManager.h (Not Included)
+   │       └── NoCheat.Build.cs
+   └── ThirdParty/
+       └── NoCheatLibrary/
+           ├── include/ (Not Included)
+           │   └── nocheat.h (Not Included)
+           └── lib/
+               ├── Win64/
+               │   ├── nocheat.dll (Not Included)
+               │   └── nocheat.lib (Not Included)
+               ├── Mac/
+               │   └── libnocheat.dylib (Not Included)
+               └── Linux/
+                   └── libnocheat.so (Not Included)
    ```
 
-3. Copy the compiled library to the appropriate platform folder in `ThirdParty/NoCheatLib/lib/`
+2. Copy the compiled library to the appropriate platform folder in `ThirdParty/NoCheatLibrary/lib/`
 
-4. Create a C interface header in `ThirdParty/NoCheatLib/include/nocheat.h`:
+3. Create a C interface header in `ThirdParty/NoCheatLibrary/include/nocheat.h`:
    ```c
    #pragma once
 
@@ -117,7 +191,7 @@ The system outputs:
    #endif
    ```
 
-5. Update `NoCheat.Build.cs` to include the library:
+4. Create the `NoCheat.Build.cs` file to configure how the plugin is built:
    ```csharp
    using UnrealBuildTool;
    using System;
@@ -134,7 +208,7 @@ The system outputs:
        {
            PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
-           PublicIncludePaths.Add(Path.Combine(ThirdPartyPath, "NoCheatLib/include"));
+           PublicIncludePaths.Add(Path.Combine(ThirdPartyPath, "NoCheatLibrary/include"));
 
            PublicDependencyModuleNames.AddRange(new string[] {
                "Core",
@@ -146,28 +220,28 @@ The system outputs:
 
            if (Target.Platform == UnrealTargetPlatform.Win64)
            {
-               PublicAdditionalLibraries.Add(Path.Combine(ThirdPartyPath, "NoCheatLib/lib/Win64/nocheat.lib"));
+               PublicAdditionalLibraries.Add(Path.Combine(ThirdPartyPath, "NoCheatLibrary/lib/Win64/nocheat.lib"));
                PublicDelayLoadDLLs.Add("nocheat.dll");
                RuntimeDependencies.Add(Path.Combine("$(BinaryOutputDir)", "nocheat.dll"), 
-                   Path.Combine(ThirdPartyPath, "NoCheatLib/lib/Win64/nocheat.dll"));
+                   Path.Combine(ThirdPartyPath, "NoCheatLibrary/lib/Win64/nocheat.dll"));
            }
            else if (Target.Platform == UnrealTargetPlatform.Mac)
            {
-               PublicAdditionalLibraries.Add(Path.Combine(ThirdPartyPath, "NoCheatLib/lib/Mac/libnocheat.dylib"));
+               PublicAdditionalLibraries.Add(Path.Combine(ThirdPartyPath, "NoCheatLibrary/lib/Mac/libnocheat.dylib"));
                RuntimeDependencies.Add(Path.Combine("$(BinaryOutputDir)", "libnocheat.dylib"), 
-                   Path.Combine(ThirdPartyPath, "NoCheatLib/lib/Mac/libnocheat.dylib"));
+                   Path.Combine(ThirdPartyPath, "NoCheatLibrary/lib/Mac/libnocheat.dylib"));
            }
            else if (Target.Platform == UnrealTargetPlatform.Linux)
            {
-               PublicAdditionalLibraries.Add(Path.Combine(ThirdPartyPath, "NoCheatLib/lib/Linux/libnocheat.so"));
+               PublicAdditionalLibraries.Add(Path.Combine(ThirdPartyPath, "NoCheatLibrary/lib/Linux/libnocheat.so"));
                RuntimeDependencies.Add(Path.Combine("$(BinaryOutputDir)", "libnocheat.so"), 
-                   Path.Combine(ThirdPartyPath, "NoCheatLib/lib/Linux/libnocheat.so"));
+                   Path.Combine(ThirdPartyPath, "NoCheatLibrary/lib/Linux/libnocheat.so"));
            }
        }
    }
    ```
 
-6. Update `NoCheat.uplugin`:
+5. Create the `NoCheat.uplugin` file:
    ```json
    {
        "FileVersion": 3,
@@ -420,11 +494,13 @@ The system outputs:
 
 1. **Collect Sufficient Data**: The more player statistics you can collect, the more accurate the cheat detection will be.
 
-2. **Tune for Your Game**: Adjust the suspicion thresholds based on your game's mechanics. For example, a sniper-focused game will naturally have higher headshot ratios.
+2. **Train With Real Data**: While the default model provides a starting point, training with real data from your specific game will yield much better results.
 
-3. **Update Regularly**: Keep your cheat model updated as new cheating methods emerge. Consider implementing a system to update the model remotely.
+3. **Tune for Your Game**: Adjust the suspicion thresholds based on your game's mechanics. For example, a sniper-focused game will naturally have higher headshot ratios.
 
-4. **Combine with Other Systems**: NoCheat works best as part of a layered anti-cheat approach:
+4. **Update Regularly**: Keep your cheat model updated as new cheating methods emerge. Consider implementing a system to update the model remotely.
+
+5. **Combine with Other Systems**: NoCheat works best as part of a layered anti-cheat approach:
    - Server-side movement validation
    - Client-side integrity checks
    - Statistical analysis (NoCheat)
@@ -432,10 +508,11 @@ The system outputs:
 
 ## Customizing Detection
 
-To customize the detection thresholds for your specific game, you can modify:
+To customize the detection for your specific game, you can:
 
-1. **Model Parameters**: Train your own RandomForest model with specific weights for your game's mechanics
-2. **Flag Thresholds**: Adjust the thresholds in the `do_analysis` function in `src/lib.rs`
+1. **Train Your Own Model**: Use the `train_model` function with your own labeled dataset
+2. **Generate a Starter Model**: Use `generate_default_model` and fine-tune it later
+3. **Adjust Flag Thresholds**: Modify the thresholds in the `do_analysis` function in `src/lib.rs`
 
 ## License
 
@@ -443,4 +520,4 @@ To customize the detection thresholds for your specific game, you can modify:
 
 ## Contributing
 
-We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for details.
+[Include contribution guidelines here]
