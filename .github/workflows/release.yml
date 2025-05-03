@@ -1,0 +1,62 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*'  # Push events to matching v*, i.e. v1.0, v20.15.10
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build Docker image
+        run: docker build -t nocheat-builder .
+
+      - name: Run cross-compilation
+        run: docker run --rm -v ${{ github.workspace }}:/app nocheat-builder
+      
+      - name: Create Release Directory
+        run: mkdir -p release-artifacts
+
+      - name: Package artifacts
+        run: |
+          cp target/release-builds/* release-artifacts/
+          cd release-artifacts
+          zip -r nocheat-${{ github.ref_name }}-windows.zip nocheat_windows_x86_64.dll
+          zip -r nocheat-${{ github.ref_name }}-linux.zip libnocheat_linux_x86_64.so
+          zip -r nocheat-${{ github.ref_name }}-macos-intel.zip libnocheat_macos_x86_64.dylib
+          zip -r nocheat-${{ github.ref_name }}-macos-arm.zip libnocheat_macos_arm64.dylib
+          zip -r nocheat-${{ github.ref_name }}-all.zip *.so *.dll *.dylib
+
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            release-artifacts/nocheat-${{ github.ref_name }}-windows.zip
+            release-artifacts/nocheat-${{ github.ref_name }}-linux.zip
+            release-artifacts/nocheat-${{ github.ref_name }}-macos-intel.zip
+            release-artifacts/nocheat-${{ github.ref_name }}-macos-arm.zip
+            release-artifacts/nocheat-${{ github.ref_name }}-all.zip
+          draft: false
+          prerelease: false
+          name: Release ${{ github.ref_name }}
+          body: |
+            # NoCheat ${{ github.ref_name }} Release
+            
+            ## Binaries
+            - Windows x86_64 (.dll)
+            - Linux x86_64 (.so)  
+            - macOS Intel x86_64 (.dylib)
+            - macOS ARM64/Apple Silicon (.dylib)
+            
+            ## Installation
+            Download the appropriate binary for your platform.
+            
+            _Generated automatically by GitHub Actions_

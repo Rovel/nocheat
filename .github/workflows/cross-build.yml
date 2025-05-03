@@ -1,0 +1,52 @@
+name: Cross-Platform Build
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:  # Allows manual triggering
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build Docker image
+        run: docker build -t nocheat-builder .
+
+      - name: Run cross-compilation
+        run: docker run --rm -v ${{ github.workspace }}:/app nocheat-builder
+
+      - name: Upload Linux build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: linux-build
+          path: target/release-builds/libnocheat_linux_x86_64.so
+          if-no-files-found: error
+
+      - name: Upload Windows build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: windows-build
+          path: target/release-builds/nocheat_windows_x86_64.dll
+          if-no-files-found: error
+
+      - name: Upload macOS Intel build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: macos-intel-build
+          path: target/release-builds/libnocheat_macos_x86_64.dylib
+          if-no-files-found: error
+
+      - name: Upload macOS ARM build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: macos-arm-build
+          path: target/release-builds/libnocheat_macos_arm64.dylib
+          if-no-files-found: error
