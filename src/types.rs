@@ -3,7 +3,7 @@ use std::collections::HashMap;
 
 /// Represents player statistics from a game round.
 ///
-/// This structure contains all the statistics for a single player that are 
+/// This structure contains all the statistics for a single player that are
 /// needed to analyze whether the player might be cheating.
 ///
 /// # Example
@@ -15,7 +15,7 @@ use std::collections::HashMap;
 /// // Create stats for a player
 /// let mut shots = HashMap::new();
 /// shots.insert("rifle".to_string(), 100);
-/// 
+///
 /// let mut hits = HashMap::new();
 /// hits.insert("rifle".to_string(), 50);
 ///
@@ -116,7 +116,7 @@ mod tests {
         let mut shots = HashMap::new();
         shots.insert("rifle".to_string(), 100);
         shots.insert("pistol".to_string(), 20);
-        
+
         let mut hits = HashMap::new();
         hits.insert("rifle".to_string(), 50);
         hits.insert("pistol".to_string(), 15);
