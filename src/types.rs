@@ -25,11 +25,12 @@ use std::collections::HashMap;
 ///     hits: hits,
 ///     headshots: 10,
 ///     shot_timestamps_ms: None,
+///     training_label: None,
 /// };
 ///
 /// assert_eq!(player_stats.player_id, "player123");
 /// ```
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone)]
 pub struct PlayerStats {
     /// Unique identifier for the player
     pub player_id: String,
@@ -41,6 +42,9 @@ pub struct PlayerStats {
     pub headshots: u32,
     /// Optional raw shot timestamps in milliseconds (for timing analysis)
     pub shot_timestamps_ms: Option<Vec<u64>>,
+    /// Optional training label (1.0 for cheater, 0.0 for legitimate player)
+    #[serde(default)]
+    pub training_label: Option<f64>,
 }
 
 /// Analysis result for a single player.
@@ -123,6 +127,7 @@ mod tests {
             hits: hits,
             headshots: 10,
             shot_timestamps_ms: Some(vec![100, 200, 300]),
+            training_label: None,
         };
 
         assert_eq!(stats.player_id, "player123");

@@ -27,25 +27,18 @@ let mut hits = HashMap::new();
 hits.insert("rifle".to_string(), 80);  // Unusually high accuracy
 
 let player_stats = PlayerStats {
-    player_id: "suspect_player".to_string(),
+    player_id: "player123".to_string(),
     shots_fired: shots,
     hits: hits,
-    headshots: 40,  // Very high headshot ratio
+    headshots: 60,
     shot_timestamps_ms: None,
+    training_label: None,
 };
 
 // Analyze the stats
 let analysis = analyze_stats(vec![player_stats]);
 if let Ok(response) = analysis {
-    for result in response.results {
-        println!("Player {} has suspicion score: {}", 
-                 result.player_id, result.suspicion_score);
-        
-        if result.suspicion_score > 0.7 {
-            println!("This player is likely cheating!");
-            println!("Flags: {:?}", result.flags);
-        }
-    }
+    // Do something with the results
 }
 ```
 */
@@ -57,6 +50,9 @@ use polars::prelude::*;
 use std::{fs::File, ptr};
 use ndarray::Array2;
 use randomforest::RandomForestClassifier;
+
+
+use std::collections::HashMap;
 
 pub mod types;
 use types::{AnalysisResponse, PlayerResult, PlayerStats};
@@ -94,6 +90,7 @@ use types::{AnalysisResponse, PlayerResult, PlayerStats};
 ///     hits: hits,
 ///     headshots: 10,
 ///     shot_timestamps_ms: None,
+///     training_label: None,
 /// }];
 ///
 /// let results = analyze_stats(stats).expect("Analysis failed");
@@ -105,7 +102,7 @@ pub fn analyze_stats(stats: Vec<PlayerStats>) -> Result<AnalysisResponse> {
 
 /// Load pre-trained RandomForest model on first use
 static RF_MODEL: Lazy<RandomForestClassifier> = Lazy::new(|| {
-    load_model("cheat_model.bin").expect("Failed to load RF model")
+    load_model("models/cheat_model.bin").expect("Failed to load RF model")
 });
 
 /// Deserialize RF from file
@@ -148,6 +145,7 @@ fn load_model(path: &str) -> Result<RandomForestClassifier> {
 ///     hits: hits,
 ///     headshots: 10,
 ///     shot_timestamps_ms: None,
+///     training_label: None,
 /// }];
 ///
 /// let df = build_dataframe(&stats).expect("DataFrame creation failed");
@@ -203,6 +201,7 @@ pub fn build_dataframe(stats: &[PlayerStats]) -> Result<DataFrame> {
 ///     hits: hits,
 ///     headshots: 10,
 ///     shot_timestamps_ms: None,
+///     training_label: None,
 /// }];
 ///
 /// let df = build_dataframe(&stats).expect("DataFrame creation failed");
@@ -233,13 +232,18 @@ pub fn df_to_ndarray(df: &DataFrame, cols: &[&str]) -> Result<Array2<f32>> {
 
 /// Core analysis function: feature engineering + RF inference
 fn do_analysis(stats: Vec<PlayerStats>) -> Result<AnalysisResponse> {
+    // Check if we can load the model (for debugging)
+    if !std::path::Path::new("models/cheat_model.bin").exists() {
+        return Err(anyhow::anyhow!("models/cheat_model.bin does not exist"));
+    }
+    
     // 1. DataFrame
     let mut df = build_dataframe(&stats)?;
 
-    // 2. Compute features lazily
+    // 2. Compute features lazily - explicitly cast to Float32 to ensure correct types
     let lf = df.lazy()
-        .with_column((col("hits") / col("shots")).alias("hit_rate"))
-        .with_column((col("headshots") / col("hits")).alias("headshot_rate"));
+        .with_column((col("hits").cast(DataType::Float32) / col("shots").cast(DataType::Float32)).alias("hit_rate"))
+        .with_column((col("headshots").cast(DataType::Float32) / col("hits").cast(DataType::Float32)).alias("headshot_rate"));
     df = lf.collect()?;
 
     // 3. Extract features for RF
@@ -257,7 +261,12 @@ fn do_analysis(stats: Vec<PlayerStats>) -> Result<AnalysisResponse> {
             .collect();
             
         // Get prediction score (single f64 value)
-        let score = RF_MODEL.predict(&row_features) as f32;
+        let score = match std::panic::catch_unwind(|| {
+            RF_MODEL.predict(&row_features)
+        }) {
+            Ok(score) => score as f32,
+            Err(_) => return Err(anyhow::anyhow!("Model prediction failed")),
+        };
         
         // Build flags
         let mut flags = Vec::new();
@@ -273,6 +282,218 @@ fn do_analysis(stats: Vec<PlayerStats>) -> Result<AnalysisResponse> {
     }
 
     Ok(AnalysisResponse { results })
+}
+
+/// Train a new cheat detection model and save it to disk.
+///
+/// This function trains a RandomForestClassifier model using labeled training data
+/// and saves the resulting model to the specified path.
+///
+/// # Arguments
+///
+/// * `training_data` - A vector of PlayerStats containing labeled training data
+/// * `labels` - A vector of binary labels (1.0 for cheaters, 0.0 for legitimate players)
+/// * `output_path` - Path where the trained model will be saved
+///
+/// # Returns
+///
+/// * `Result<()>` - Ok if the model was trained and saved successfully
+///
+/// # Example
+///
+/// ```no_run
+/// use nocheat::{train_model};
+/// use nocheat::types::PlayerStats;
+/// use std::collections::HashMap;
+///
+/// // Create training data
+/// let mut training_data = Vec::new();
+/// let mut labels = Vec::new();
+///
+/// // Example of a legitimate player
+/// let mut shots = HashMap::new();
+/// shots.insert("rifle".to_string(), 100);
+/// let mut hits = HashMap::new();
+/// hits.insert("rifle".to_string(), 50); // 50% accuracy is normal
+///
+/// training_data.push(PlayerStats {
+///     player_id: "normal_player".to_string(),
+///     shots_fired: shots.clone(),
+///     hits: hits.clone(),
+///     headshots: 10, // 20% headshot ratio is normal
+///     shot_timestamps_ms: None,
+///     training_label: None,
+/// });
+/// labels.push(0.0); // Not a cheater
+///
+/// // Example of a cheating player
+/// let mut shots = HashMap::new();
+/// shots.insert("rifle".to_string(), 100);
+/// let mut hits = HashMap::new();
+/// hits.insert("rifle".to_string(), 95); // 95% accuracy is suspicious
+///
+/// training_data.push(PlayerStats {
+///     player_id: "cheater".to_string(),
+///     shots_fired: shots,
+///     hits: hits,
+///     headshots: 70, // 70% headshot ratio is very suspicious
+///     shot_timestamps_ms: None,
+///     training_label: None,
+/// });
+/// labels.push(1.0); // Labeled as a cheater
+///
+/// // Train and save model
+/// train_model(training_data, labels, "cheat_model.bin").expect("Failed to train model");
+/// ```
+pub fn train_model(training_data: Vec<PlayerStats>, labels: Vec<f64>, output_path: &str) -> Result<()> {
+    // Validate inputs
+    if training_data.len() != labels.len() {
+        return Err(anyhow::anyhow!("Number of samples and labels must match"));
+    }
+    
+    if training_data.is_empty() {
+        return Err(anyhow::anyhow!("Training data cannot be empty"));
+    }
+    
+    // 1. Build DataFrame from training data
+    let mut df = build_dataframe(&training_data)?;
+    
+    // 2. Add features using lazy evaluation
+    let lf = df.lazy()
+        .with_column((col("hits").cast(DataType::Float32) / col("shots").cast(DataType::Float32)).alias("hit_rate"))
+        .with_column((col("headshots").cast(DataType::Float32) / col("hits").cast(DataType::Float32)).alias("headshot_rate"));
+    df = lf.collect()?;
+    
+    // 3. Extract features for training
+    let feature_cols = ["hit_rate", "headshot_rate"];
+    let features = df_to_ndarray(&df, &feature_cols)?;
+    
+    // 4. Convert features to training format expected by RandomForest
+    let training_features: Vec<Vec<f64>> = features
+        .rows()
+        .into_iter()
+        .map(|row| row.iter().map(|&v| v as f64).collect())
+        .collect();
+    
+    // 5. Train RandomForest model using the example from the RandomForest repository
+    use randomforest::criterion::Gini;
+    use randomforest::table::TableBuilder;
+    
+    // Create a table builder
+    let mut table_builder = TableBuilder::new();
+    
+    // Add each row of features and its corresponding label
+    for (idx, features) in training_features.iter().enumerate() {
+        table_builder.add_row(features, labels[idx])
+            .map_err(|e| anyhow::anyhow!("Failed to add row to table: {}", e))?;
+    }
+    
+    // Build the table
+    let table = table_builder.build()
+        .map_err(|e| anyhow::anyhow!("Failed to build table: {}", e))?;
+    
+    // Train the model using Gini impurity criterion
+    let forest = RandomForestClassifier::fit(Gini, table);
+    
+    // 6. Save model to file
+    let file = File::create(output_path)?;
+    if let Err(e) = forest.serialize(file) {
+        return Err(anyhow::anyhow!("Failed to serialize model: {}", e));
+    }
+    
+    Ok(())
+}
+
+/// Generate a default model based on built-in example data.
+///
+/// This is useful for getting started quickly with a basic model
+/// when you don't have enough training data yet.
+///
+/// # Arguments
+///
+/// * `output_path` - Path where the trained model will be saved
+///
+/// # Returns
+///
+/// * `Result<()>` - Ok if the model was created and saved successfully
+///
+/// # Example
+///
+/// ```no_run
+/// use nocheat::generate_default_model;
+///
+/// // Generate a default model
+/// generate_default_model("cheat_model.bin").expect("Failed to generate default model");
+/// ```
+pub fn generate_default_model(output_path: &str) -> Result<()> {
+    // Create example training data
+    let mut training_data = Vec::new();
+    let mut labels = Vec::new();
+    
+    // Generate several examples of legitimate players
+    for i in 0..50 {
+        let mut shots = HashMap::new();
+        let mut hits = HashMap::new();
+        
+        // Random accuracy between 40-65%
+        let shot_count = 100 + i;
+        let accuracy = 0.4 + (i % 25) as f32 * 0.01;
+        let hit_count = (shot_count as f32 * accuracy) as u32;
+        
+        shots.insert("rifle".to_string(), shot_count);
+        shots.insert("pistol".to_string(), shot_count / 2);
+        hits.insert("rifle".to_string(), hit_count);
+        hits.insert("pistol".to_string(), hit_count / 2);
+        
+        // Normal headshot ratio 10-25%
+        let headshot_ratio = 0.1 + (i % 15) as f32 * 0.01;
+        let headshots = (hit_count as f32 * headshot_ratio) as u32;
+        
+        training_data.push(PlayerStats {
+            player_id: format!("normal_player_{}", i),
+            shots_fired: shots,
+            hits: hits,
+            headshots,
+            shot_timestamps_ms: None,
+            training_label: Some(0.0),
+        });
+        
+        labels.push(0.0); // Not a cheater
+    }
+    
+    // Generate several examples of cheating players
+    for i in 0..50 {
+        let mut shots = HashMap::new();
+        let mut hits = HashMap::new();
+        
+        // Very high accuracy 80-98%
+        let shot_count = 100 + i;
+        let accuracy = 0.8 + (i % 18) as f32 * 0.01;
+        let hit_count = (shot_count as f32 * accuracy) as u32;
+        
+        shots.insert("rifle".to_string(), shot_count);
+        shots.insert("pistol".to_string(), shot_count / 2);
+        hits.insert("rifle".to_string(), hit_count);
+        hits.insert("pistol".to_string(), hit_count / 2);
+        
+        // High headshot ratio 40-80%
+        let headshot_ratio = 0.4 + (i % 40) as f32 * 0.01;
+        let headshots = (hit_count as f32 * headshot_ratio) as u32;
+        
+        training_data.push(PlayerStats {
+            player_id: format!("cheater_{}", i),
+            shots_fired: shots,
+            hits: hits,
+            headshots,
+            shot_timestamps_ms: None,
+            training_label: Some(1.0),
+        });
+        
+        labels.push(1.0); // Labeled as a cheater
+    }
+    
+    // Train and save the model
+    train_model(training_data, labels, output_path)
 }
 
 /// FFI: analyze a JSON buffer of PlayerStats; returns JSON buffer
@@ -377,6 +598,7 @@ fn write_buffer(
 mod tests {
     use super::*;
     use std::collections::HashMap;
+    use std::fs;
 
     fn create_test_stats() -> Vec<PlayerStats> {
         let mut shots1 = HashMap::new();
@@ -398,6 +620,7 @@ mod tests {
                 hits: hits1,
                 headshots: 10,
                 shot_timestamps_ms: None,
+                training_label: None,
             },
             PlayerStats {
                 player_id: "suspicious_player".to_string(),
@@ -405,6 +628,7 @@ mod tests {
                 hits: hits2,
                 headshots: 50, // suspicious headshot count
                 shot_timestamps_ms: None,
+                training_label: None,
             },
         ]
     }
@@ -474,5 +698,75 @@ mod tests {
         let tolerance = 1e-5;
         assert!((features[[0, 0]] - expected_normal).abs() < tolerance);
         assert!((features[[1, 0]] - expected_suspicious).abs() < tolerance);
+    }
+
+    #[test]
+    fn test_train_model() {
+        // Create a temporary file path for the model
+        let temp_dir = std::env::temp_dir();
+        let model_path = temp_dir.join("test_model.bin");
+        
+        // Create simple training data
+        let mut training_data = Vec::new();
+        let mut labels = Vec::new();
+        
+        // Add a normal player
+        let mut shots = HashMap::new();
+        shots.insert("rifle".to_string(), 100);
+        let mut hits = HashMap::new();
+        hits.insert("rifle".to_string(), 50);
+        
+        training_data.push(PlayerStats {
+            player_id: "normal_player".to_string(),
+            shots_fired: shots,
+            hits: hits,
+            headshots: 10,
+            shot_timestamps_ms: None,
+            training_label: None,
+        });
+        labels.push(0.0);
+        
+        // Add a cheating player
+        let mut shots = HashMap::new();
+        shots.insert("rifle".to_string(), 100);
+        let mut hits = HashMap::new();
+        hits.insert("rifle".to_string(), 95);
+        
+        training_data.push(PlayerStats {
+            player_id: "cheater".to_string(),
+            shots_fired: shots,
+            hits: hits,
+            headshots: 70,
+            shot_timestamps_ms: None,
+            training_label: None,
+        });
+        labels.push(1.0);
+        
+        // Train the model
+        let result = train_model(training_data, labels, model_path.to_str().unwrap());
+        assert!(result.is_ok());
+        
+        // Verify the model file exists
+        assert!(model_path.exists());
+        
+        // Clean up
+        let _ = fs::remove_file(model_path);
+    }
+    
+    #[test]
+    fn test_generate_default_model() {
+        // Create a temporary file path for the model
+        let temp_dir = std::env::temp_dir();
+        let model_path = temp_dir.join("default_model.bin");
+        
+        // Generate the default model
+        let result = generate_default_model(model_path.to_str().unwrap());
+        assert!(result.is_ok());
+        
+        // Verify the model file exists
+        assert!(model_path.exists());
+        
+        // Clean up
+        let _ = fs::remove_file(model_path);
     }
 }

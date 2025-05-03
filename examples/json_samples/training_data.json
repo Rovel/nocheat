@@ -1,0 +1,142 @@
+[
+  {
+    "player_id": "normal_player_1",
+    "shots_fired": {
+      "rifle": 100,
+      "pistol": 50
+    },
+    "hits": {
+      "rifle": 45,
+      "pistol": 20
+    },
+    "headshots": 8,
+    "shot_timestamps_ms": [1000, 1350, 1700, 2050, 2400, 2750, 3100, 3450, 3800, 4150],
+    "training_label": 0.0
+  },
+  {
+    "player_id": "normal_player_2",
+    "shots_fired": {
+      "rifle": 150,
+      "pistol": 30
+    },
+    "hits": {
+      "rifle": 65,
+      "pistol": 15
+    },
+    "headshots": 12,
+    "shot_timestamps_ms": [1100, 1500, 1900, 2300, 2700, 3100, 3500, 3900, 4300, 4700],
+    "training_label": 0.0
+  },
+  {
+    "player_id": "normal_player_3",
+    "shots_fired": {
+      "rifle": 80,
+      "pistol": 60
+    },
+    "hits": {
+      "rifle": 40,
+      "pistol": 25
+    },
+    "headshots": 10,
+    "shot_timestamps_ms": [1200, 1650, 2100, 2550, 3000, 3450, 3900, 4350, 4800, 5250],
+    "training_label": 0.0
+  },
+  {
+    "player_id": "normal_player_4",
+    "shots_fired": {
+      "rifle": 120,
+      "pistol": 40
+    },
+    "hits": {
+      "rifle": 50,
+      "pistol": 18
+    },
+    "headshots": 9,
+    "shot_timestamps_ms": [1300, 1800, 2300, 2800, 3300, 3800, 4300, 4800, 5300, 5800],
+    "training_label": 0.0
+  },
+  {
+    "player_id": "normal_player_5",
+    "shots_fired": {
+      "rifle": 90,
+      "pistol": 70
+    },
+    "hits": {
+      "rifle": 44,
+      "pistol": 28
+    },
+    "headshots": 15,
+    "shot_timestamps_ms": [1400, 1950, 2500, 3050, 3600, 4150, 4700, 5250, 5800, 6350],
+    "training_label": 0.0
+  },
+  {
+    "player_id": "cheater_1",
+    "shots_fired": {
+      "rifle": 100,
+      "pistol": 50
+    },
+    "hits": {
+      "rifle": 90,
+      "pistol": 45
+    },
+    "headshots": 70,
+    "shot_timestamps_ms": [1000, 1050, 1100, 1150, 1200, 1250, 1300, 1350, 1400, 1450],
+    "training_label": 1.0
+  },
+  {
+    "player_id": "cheater_2",
+    "shots_fired": {
+      "rifle": 150,
+      "pistol": 30
+    },
+    "hits": {
+      "rifle": 140,
+      "pistol": 28
+    },
+    "headshots": 105,
+    "shot_timestamps_ms": [1100, 1150, 1200, 1250, 1300, 1350, 1400, 1450, 1500, 1550],
+    "training_label": 1.0
+  },
+  {
+    "player_id": "cheater_3",
+    "shots_fired": {
+      "rifle": 80,
+      "pistol": 60
+    },
+    "hits": {
+      "rifle": 75,
+      "pistol": 56
+    },
+    "headshots": 65,
+    "shot_timestamps_ms": [1200, 1250, 1300, 1350, 1400, 1450, 1500, 1550, 1600, 1650],
+    "training_label": 1.0
+  },
+  {
+    "player_id": "cheater_4",
+    "shots_fired": {
+      "rifle": 120,
+      "pistol": 40
+    },
+    "hits": {
+      "rifle": 115,
+      "pistol": 38
+    },
+    "headshots": 95,
+    "shot_timestamps_ms": [1300, 1350, 1400, 1450, 1500, 1550, 1600, 1650, 1700, 1750],
+    "training_label": 1.0
+  },
+  {
+    "player_id": "cheater_5",
+    "shots_fired": {
+      "rifle": 90,
+      "pistol": 70
+    },
+    "hits": {
+      "rifle": 88,
+      "pistol": 68
+    },
+    "headshots": 75,
+    "shot_timestamps_ms": [1400, 1450, 1500, 1550, 1600, 1650, 1700, 1750, 1800, 1850],
+    "training_label": 1.0
+  }
+]
