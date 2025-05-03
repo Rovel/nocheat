@@ -465,7 +465,7 @@ pub fn generate_default_model(output_path: &str) -> Result<()> {
         training_data.push(PlayerStats {
             player_id: format!("normal_player_{}", i),
             shots_fired: shots,
-            hits: hits,
+            hits,
             headshots,
             shot_timestamps_ms: None,
             training_label: Some(0.0),
@@ -496,7 +496,7 @@ pub fn generate_default_model(output_path: &str) -> Result<()> {
         training_data.push(PlayerStats {
             player_id: format!("cheater_{}", i),
             shots_fired: shots,
-            hits: hits,
+            hits,
             headshots,
             shot_timestamps_ms: None,
             training_label: Some(1.0),
@@ -540,7 +540,7 @@ pub fn generate_default_model(output_path: &str) -> Result<()> {
 ///   * `-4` - Serialization error
 ///   * `-5` - Memory allocation error
 #[no_mangle]
-pub extern "C" fn analyze_round(
+pub unsafe extern "C" fn analyze_round(
     stats_json_ptr: *const c_uchar,
     stats_json_len: size_t,
     out_json_ptr: *mut *mut c_uchar,
@@ -550,7 +550,7 @@ pub extern "C" fn analyze_round(
     if stats_json_ptr.is_null() || out_json_ptr.is_null() || out_json_len.is_null() {
         return -1;
     }
-    let input = unsafe { std::slice::from_raw_parts(stats_json_ptr, stats_json_len) };
+    let input = std::slice::from_raw_parts(stats_json_ptr, stats_json_len);
     let stats: Vec<PlayerStats> = match serde_json::from_slice(input) {
         Ok(v) => v,
         Err(_) => return -2,
@@ -579,13 +579,11 @@ pub extern "C" fn analyze_round(
 /// * `ptr` - Pointer to the buffer to free
 /// * `len` - Length of the buffer in bytes
 #[no_mangle]
-pub extern "C" fn free_buffer(ptr: *mut c_uchar, len: size_t) {
+pub unsafe extern "C" fn free_buffer(ptr: *mut c_uchar, len: size_t) {
     if ptr.is_null() || len == 0 {
         return;
     }
-    unsafe {
-        let _ = Vec::from_raw_parts(ptr, len, len);
-    }
+    let _ = Vec::from_raw_parts(ptr, len, len);
 }
 
 /// Serialize response and allocate C buffer
@@ -739,7 +737,7 @@ mod tests {
         training_data.push(PlayerStats {
             player_id: "normal_player".to_string(),
             shots_fired: shots,
-            hits: hits,
+            hits,
             headshots: 10,
             shot_timestamps_ms: None,
             training_label: None,
@@ -755,7 +753,7 @@ mod tests {
         training_data.push(PlayerStats {
             player_id: "cheater".to_string(),
             shots_fired: shots,
-            hits: hits,
+            hits,
             headshots: 70,
             shot_timestamps_ms: None,
             training_label: None,
