@@ -7,7 +7,12 @@ mkdir -p target/release-builds
 # Build for Linux (x86_64, static linking with musl)
 echo "Building for Linux (x86_64)..."
 cargo build --release --target x86_64-unknown-linux-musl
-cp target/x86_64-unknown-linux-musl/release/libnocheat.so target/release-builds/libnocheat_linux_x86_64.so
+cp target/x86_64-unknown-linux-musl/release/libnocheat.rlib target/release-builds/libnocheat_linux_x86_64.a
+
+# Build for Linux (x86_64, dynamic linking - standard)
+echo "Building for Linux (x86_64) with dynamic linking..."
+cargo build --release --target x86_64-unknown-linux-gnu
+cp target/x86_64-unknown-linux-gnu/release/libnocheat.so target/release-builds/libnocheat_linux_x86_64.so
 
 # Build for Windows (x86_64)
 echo "Building for Windows (x86_64)..."
