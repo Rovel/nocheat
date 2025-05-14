@@ -101,7 +101,10 @@ pub fn analyze_stats(stats: Vec<PlayerStats>) -> Result<AnalysisResponse> {
 
 /// Load pre-trained RandomForest model on first use
 static RF_MODEL: Lazy<RandomForestClassifier> =
-    Lazy::new(|| load_model("models/cheat_model.bin").expect("Failed to load RF model"));
+    Lazy::new(|| load_model(unsafe { CURRENT_MODEL_PATH }).expect("Failed to load RF model"));
+
+/// Path to the current model, can be updated via set_model_path
+static mut CURRENT_MODEL_PATH: &str = "models/cheat_model.bin";
 
 /// Deserialize RF from file
 fn load_model(path: &str) -> Result<RandomForestClassifier> {
@@ -231,8 +234,10 @@ pub fn df_to_ndarray(df: &DataFrame, cols: &[&str]) -> Result<Array2<f32>> {
 /// Core analysis function: feature engineering + RF inference
 fn do_analysis(stats: Vec<PlayerStats>) -> Result<AnalysisResponse> {
     // Check if we can load the model (for debugging)
-    if !std::path::Path::new("models/cheat_model.bin").exists() {
-        return Err(anyhow::anyhow!("models/cheat_model.bin does not exist"));
+    if !std::path::Path::new(unsafe { CURRENT_MODEL_PATH }).exists() {
+        return Err(anyhow::anyhow!("{} does not exist", unsafe {
+            CURRENT_MODEL_PATH
+        }));
     }
 
     // 1. DataFrame
@@ -609,6 +614,63 @@ fn write_buffer(
     0
 }
 
+/// Set the path to load a custom model
+///
+/// This function allows loading a custom model from a specified path.
+/// It's particularly useful when integrating with game engines like Unreal Engine
+/// where the default path may not be accessible or when you want to load different models.
+///
+/// # Safety
+///
+/// This function is unsafe because it:
+/// - Modifies a global static variable that affects all future model loading
+/// - Takes a raw pointer that must be valid UTF-8 encoded path string
+///
+/// # Arguments
+///
+/// * `path_ptr` - Pointer to a null-terminated UTF-8 encoded string containing the model path
+/// * `path_len` - Length of the path string in bytes (not including null terminator)
+///
+/// # Returns
+///
+/// * `0` on success
+/// * `-1` if the path pointer is null
+/// * `-2` if the path is not valid UTF-8
+/// * `-3` if the model file doesn't exist or can't be opened
+/// * `-4` if the model couldn't be deserialized (invalid format)
+#[no_mangle]
+pub unsafe extern "C" fn set_model_path(path_ptr: *const c_uchar, path_len: size_t) -> c_int {
+    // Check for null pointer
+    if path_ptr.is_null() {
+        return -1;
+    }
+
+    // Convert C string to Rust string slice
+    let path_bytes = std::slice::from_raw_parts(path_ptr, path_len);
+    let path_str = match std::str::from_utf8(path_bytes) {
+        Ok(s) => s,
+        Err(_) => return -2,
+    };
+
+    // Verify the model file exists and can be loaded
+    let path_exists = std::path::Path::new(path_str).exists();
+    if !path_exists {
+        return -3;
+    }
+
+    // Try to load the model to verify it works
+    match load_model(path_str) {
+        Ok(_) => {
+            // Update the global model path
+            let path_string = String::from(path_str);
+            let path_box: Box<str> = path_string.into_boxed_str();
+            CURRENT_MODEL_PATH = Box::leak(path_box);
+            0
+        }
+        Err(_) => -4,
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -786,5 +848,45 @@ mod tests {
 
         // Clean up
         let _ = fs::remove_file(model_path);
+    }
+    #[test]
+    fn test_set_model_path() {
+        // Create a temporary model file
+        let temp_dir = std::env::temp_dir();
+        let model_path = temp_dir.join("custom_model.bin");
+        let model_path_str = model_path.to_str().unwrap();
+
+        // Generate a model to use for testing
+        generate_default_model(model_path_str).expect("Failed to generate test model");
+
+        // Save the original model path to restore it later
+        let original_path = unsafe { CURRENT_MODEL_PATH };
+
+        // Call set_model_path using the FFI interface
+        let path_bytes = model_path_str.as_bytes();
+        let path_len = path_bytes.len();
+
+        let result = unsafe { set_model_path(path_bytes.as_ptr(), path_len) };
+
+        assert_eq!(
+            result, 0,
+            "Expected set_model_path to return success code 0"
+        );
+
+        // Verify the model path was updated - we need to be careful with mutable static
+        let current_path = unsafe { CURRENT_MODEL_PATH };
+        assert_eq!(
+            current_path, model_path_str,
+            "Model path was not updated correctly"
+        );
+
+        // Clean up
+        let _ = fs::remove_file(model_path);
+
+        // Restore the original path by calling set_model_path again
+        let orig_bytes = original_path.as_bytes();
+        unsafe {
+            set_model_path(orig_bytes.as_ptr(), orig_bytes.len());
+        }
     }
 }
