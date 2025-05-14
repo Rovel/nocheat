@@ -6,11 +6,15 @@
 *.toml text eol=lf
 *.json text eol=lf
 *.md text eol=lf
-*.sh text eol=lf
+*.sh text eol=lf text=auto eol=lf executable
 *.cpp text eol=lf
 *.h text eol=lf
 *.cs text eol=lf
 *.uplugin text eol=lf
+
+# Specific script files that need to be executable
+build-all.sh text eol=lf executable
+docker-build.sh text eol=lf executable
 
 # Binary files that should not be modified
 *.bin binary
