@@ -1,0 +1,19 @@
+# Set the default behavior for all files: normalize line endings to LF on check-in.
+* text=auto
+
+# Explicitly declare files that should use LF
+*.rs text eol=lf
+*.toml text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+*.sh text eol=lf
+*.cpp text eol=lf
+*.h text eol=lf
+*.cs text eol=lf
+*.uplugin text eol=lf
+
+# Binary files that should not be modified
+*.bin binary
+*.dll binary
+*.exe binary
+*.pdb binary
