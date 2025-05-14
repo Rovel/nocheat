@@ -100,7 +100,8 @@ pub fn analyze_stats(stats: Vec<PlayerStats>) -> Result<AnalysisResponse> {
 }
 
 /// Load pre-trained RandomForest model on first use
-static RF_MODEL: Lazy<RandomForestClassifier> = Lazy::new(|| load_model(unsafe { CURRENT_MODEL_PATH }).expect("Failed to load RF model"));
+static RF_MODEL: Lazy<RandomForestClassifier> =
+    Lazy::new(|| load_model(unsafe { CURRENT_MODEL_PATH }).expect("Failed to load RF model"));
 
 /// Path to the current model, can be updated via set_model_path
 static mut CURRENT_MODEL_PATH: &str = "models/cheat_model.bin";
@@ -234,7 +235,9 @@ pub fn df_to_ndarray(df: &DataFrame, cols: &[&str]) -> Result<Array2<f32>> {
 fn do_analysis(stats: Vec<PlayerStats>) -> Result<AnalysisResponse> {
     // Check if we can load the model (for debugging)
     if !std::path::Path::new(unsafe { CURRENT_MODEL_PATH }).exists() {
-        return Err(anyhow::anyhow!("{} does not exist", unsafe { CURRENT_MODEL_PATH }));
+        return Err(anyhow::anyhow!("{} does not exist", unsafe {
+            CURRENT_MODEL_PATH
+        }));
     }
 
     // 1. DataFrame
@@ -636,28 +639,25 @@ fn write_buffer(
 /// * `-3` if the model file doesn't exist or can't be opened
 /// * `-4` if the model couldn't be deserialized (invalid format)
 #[no_mangle]
-pub unsafe extern "C" fn set_model_path(
-    path_ptr: *const c_uchar,
-    path_len: size_t,
-) -> c_int {
+pub unsafe extern "C" fn set_model_path(path_ptr: *const c_uchar, path_len: size_t) -> c_int {
     // Check for null pointer
     if path_ptr.is_null() {
         return -1;
     }
-    
+
     // Convert C string to Rust string slice
     let path_bytes = std::slice::from_raw_parts(path_ptr, path_len);
     let path_str = match std::str::from_utf8(path_bytes) {
         Ok(s) => s,
         Err(_) => return -2,
     };
-    
+
     // Verify the model file exists and can be loaded
     let path_exists = std::path::Path::new(path_str).exists();
     if !path_exists {
         return -3;
     }
-    
+
     // Try to load the model to verify it works
     match load_model(path_str) {
         Ok(_) => {
@@ -666,7 +666,7 @@ pub unsafe extern "C" fn set_model_path(
             let path_box: Box<str> = path_string.into_boxed_str();
             CURRENT_MODEL_PATH = Box::leak(path_box);
             0
-        },
+        }
         Err(_) => -4,
     }
 }
@@ -849,36 +849,40 @@ mod tests {
         // Clean up
         let _ = fs::remove_file(model_path);
     }
-      #[test]
+    #[test]
     fn test_set_model_path() {
         // Create a temporary model file
         let temp_dir = std::env::temp_dir();
         let model_path = temp_dir.join("custom_model.bin");
         let model_path_str = model_path.to_str().unwrap();
-        
+
         // Generate a model to use for testing
         generate_default_model(model_path_str).expect("Failed to generate test model");
-        
+
         // Save the original model path to restore it later
         let original_path = unsafe { CURRENT_MODEL_PATH };
-        
+
         // Call set_model_path using the FFI interface
         let path_bytes = model_path_str.as_bytes();
         let path_len = path_bytes.len();
-        
-        let result = unsafe {
-            set_model_path(path_bytes.as_ptr(), path_len)
-        };
-        
-        assert_eq!(result, 0, "Expected set_model_path to return success code 0");
-        
+
+        let result = unsafe { set_model_path(path_bytes.as_ptr(), path_len) };
+
+        assert_eq!(
+            result, 0,
+            "Expected set_model_path to return success code 0"
+        );
+
         // Verify the model path was updated - we need to be careful with mutable static
         let current_path = unsafe { CURRENT_MODEL_PATH };
-        assert_eq!(current_path, model_path_str, "Model path was not updated correctly");
-        
+        assert_eq!(
+            current_path, model_path_str,
+            "Model path was not updated correctly"
+        );
+
         // Clean up
         let _ = fs::remove_file(model_path);
-        
+
         // Restore the original path by calling set_model_path again
         let orig_bytes = original_path.as_bytes();
         unsafe {
