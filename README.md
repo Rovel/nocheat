@@ -10,6 +10,7 @@ NoCheat is a fast, machine learning-based anti-cheat library designed to detect 
 - C-compatible FFI for integration with game engines
 - UE5 plugin integration ready
 - DataFrame-based feature engineering
+- **Generic struct support for custom data analysis**
 
 ## How It Works
 
@@ -43,7 +44,7 @@ For better results, you can train a model with your own labeled data:
 
 ```rust
 use nocheat::{train_model};
-use nocheat::types::PlayerStats;
+use nocheat::types::{DefaultPlayerData, PlayerStats};
 use std::collections::HashMap;
 
 // Prepare your training data
@@ -56,14 +57,18 @@ shots.insert("rifle".to_string(), 100);
 let mut hits = HashMap::new();
 hits.insert("rifle".to_string(), 50);
 
-training_data.push(PlayerStats {
-    player_id: "normal_player".to_string(),
+let player_data = DefaultPlayerData {
     shots_fired: shots.clone(),
     hits: hits.clone(),
     headshots: 10,
     shot_timestamps_ms: None,
     training_label: None,
-});
+};
+
+training_data.push(PlayerStats::new(
+    "normal_player".to_string(),
+    player_data
+));
 labels.push(0.0); // Not a cheater
 
 // Example: Add a cheating player
@@ -72,19 +77,89 @@ shots.insert("rifle".to_string(), 100);
 let mut hits = HashMap::new();
 hits.insert("rifle".to_string(), 95); // Suspiciously high accuracy
 
-training_data.push(PlayerStats {
-    player_id: "cheater".to_string(),
+let cheater_data = DefaultPlayerData {
     shots_fired: shots,
     hits: hits,
     headshots: 70, // Very high headshot ratio
     shot_timestamps_ms: None,
     training_label: None,
-});
+};
+
+training_data.push(PlayerStats::new(
+    "cheater".to_string(),
+    cheater_data
+));
 labels.push(1.0); // Labeled as a cheater
 
 // Train and save model
 train_model(training_data, labels, "cheat_model.bin").expect("Failed to train model");
 ```
+
+## Using Generic Types for Custom Data Analysis
+
+NoCheat now supports generic data structures, giving you the flexibility to work with any JSON structure for player statistics. This is particularly useful when:
+
+1. Your game has unique metrics to track
+2. You want to analyze different aspects of player behavior
+3. You need to integrate with existing analytics systems
+
+### Example: Creating a Custom Data Structure
+
+```rust
+use nocheat::types::{PlayerStats, PlayerResult, AnalysisResponse};
+use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
+
+// Define a custom data structure for your game
+#[derive(Clone, Debug, Deserialize, Serialize)]
+struct CustomPlayerData {
+    accuracy: f32,
+    reaction_time_ms: Vec<u32>,
+    movement_patterns: HashMap<String, u32>,
+    mouse_acceleration: Option<f32>,
+}
+
+// Create stats with your custom data structure
+let mut movement = HashMap::new();
+movement.insert("jumps".to_string(), 50);
+movement.insert("crouches".to_string(), 30);
+
+let custom_data = CustomPlayerData {
+    accuracy: 0.75,
+    reaction_time_ms: vec![250, 220, 230, 210, 240],
+    movement_patterns: movement,
+    mouse_acceleration: Some(1.5),
+};
+
+// Create a PlayerStats instance with custom data
+let custom_stats = PlayerStats::new("custom_player".to_string(), custom_data);
+```
+
+### Custom Result Types
+
+You can also define custom result types for your analysis:
+
+```rust
+#[derive(Debug, PartialEq, Serialize)]
+struct CustomAnalysisResult {
+    cheating_probability: f32,
+    abnormal_patterns: Vec<String>,
+    confidence_score: f32,
+    recommended_action: String,
+}
+
+// Create a custom result
+let custom_result = CustomAnalysisResult {
+    cheating_probability: 0.85,
+    abnormal_patterns: vec!["AimSnap".to_string(), "RecoilControl".to_string()],
+    confidence_score: 0.92,
+    recommended_action: "Review gameplay footage".to_string(),
+};
+
+let player_result = PlayerResult::new("custom_player".to_string(), custom_result);
+```
+
+For more detailed examples, see the [Generic Usage Guide](docs/generic_usage.md).
 
 ## Integration with Unreal Engine 5
 
@@ -149,7 +224,7 @@ train_model(training_data, labels, "cheat_model.bin").expect("Failed to train mo
 
 2. Copy the compiled library to the appropriate platform folder in `ThirdParty/NoCheatLibrary/lib/`
 
-3. Create a C interface header in `ThirdParty/NoCheatLibrary/include/nocheat.h`:
+3. Create a C interface header in `ThirdParty/NoCheatLibrary/include/nocheat.h` or generate one with `cbindgen --config cbindgen.toml --crate nocheat --output ue_plugin\ThirdParty\NoCheatLib\include\nocheat.h`:
    ```c
    #pragma once
 
@@ -516,8 +591,39 @@ To customize the detection for your specific game, you can:
 
 ## License
 
-[Include your license information here]
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ## Contributing
 
-[Include contribution guidelines here]
+We welcome contributions from the community! By participating, you agree to abide by our [Code of Conduct](CODE_OF_CONDUCT.md).
+
+### Reporting Issues
+
+- Please search existing issues before opening a new one.
+- Provide a clear, descriptive title and detailed steps to reproduce.
+- Include rustc version, OS, and any relevant logs or outputs.
+
+### Pull Requests
+
+1. Fork the repository and create your branch from `main`.
+2. Follow the Rust style guidelines (run `cargo fmt` and `cargo clippy`).
+3. Write tests for your changes and ensure all existing tests pass (`cargo test`).
+4. Update documentation in `README.md` or `docs/` as needed.
+5. Submit a pull request with a clear description and link to any related issue.
+
+### Development Setup
+
+1. Install Rust via [rustup](https://rustup.rs/).
+2. Clone the repo: `git clone https://github.com/yourusername/nocheat.git`.
+3. Navigate into the project: `cd nocheat`.
+4. Build and test: `cargo build && cargo test`.
+5. Generate documentation: `cargo doc --open`.
+
+### Code Style
+
+- We use `rustfmt` for formatting and `clippy` for linting.
+- Please adhere to the existing code patterns and naming conventions.
+
+### License
+
+All contributions will be made under the MIT License, ensuring that the project remains free and open source.

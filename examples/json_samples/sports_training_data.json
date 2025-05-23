@@ -1,0 +1,50 @@
+[
+  {
+    "player_id": "soccer_legit_player_1",
+    "data": {
+      "sport": "Soccer",
+      "goals": 1,
+      "assists": 0,
+      "passes_completed": 35,
+      "tackles": 2,
+      "distance_covered_km": 9.8,
+      "training_label": 0.0
+    }
+  },
+  {
+    "player_id": "soccer_legit_player_2",
+    "data": {
+      "sport": "Soccer",
+      "goals": 2,
+      "assists": 1,
+      "passes_completed": 50,
+      "tackles": 1,
+      "distance_covered_km": 10.4,
+      "training_label": 0.0
+    }
+  },
+  {
+    "player_id": "soccer_cheater_player_1",
+    "data": {
+      "sport": "Soccer",
+      "goals": 7,
+      "assists": 3,
+      "passes_completed": 15,
+      "tackles": 0,
+      "distance_covered_km": 5.2,
+      "training_label": 1.0
+    }
+  },
+  {
+    "player_id": "soccer_cheater_player_2",
+    "data": {
+      "sport": "Soccer",
+      "goals": 8,
+      "assists": 0,
+      "passes_completed": 10,
+      "tackles": 0,
+      "distance_covered_km": 4.8,
+      "training_label": 1.0
+    }
+  }
+]

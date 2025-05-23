@@ -20,3 +20,19 @@ once_cell   = "1.17"
 
 [dev-dependencies]
 criterion    = "0.4"
+
+[[example]]
+name = "generic_usage"
+path = "examples/generic_usage.rs"
+
+[[example]]
+name = "fps_game_analysis"
+path = "examples/fps_game_analysis.rs"
+
+[[example]]
+name = "multi_game_analysis"
+path = "examples/multi_game_analysis.rs"
+
+[[example]]
+name = "train_model_example"
+path = "examples/train_model_example.rs"
