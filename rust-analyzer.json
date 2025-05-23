@@ -1,7 +1,8 @@
 {
     "cargo": {
         "excludeDir": [
-            "examples"
+            "examples",
+            "docs"
         ]
     }
 }

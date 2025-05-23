@@ -1,0 +1,110 @@
+[
+  {
+    "player_id": "fps_legit_player_1",
+    "data": {
+      "kills": 18,
+      "deaths": 15,
+      "assists": 7,
+      "weapon_stats": {
+        "rifle": {
+          "shots_fired": 120,
+          "hits": 55,
+          "headshots": 12,
+          "distance_meters": [15.2, 22.7, 18.3, 30.1, 12.5]
+        },
+        "pistol": {
+          "shots_fired": 45,
+          "hits": 18,
+          "headshots": 5,
+          "distance_meters": [8.3, 10.1, 5.7]
+        }
+      },
+      "average_position_change": 7.8,
+      "camping_seconds": 35,
+      "round_duration_seconds": 300,
+      "team": "CT",
+      "training_label": 0.0
+    }
+  },
+  {
+    "player_id": "fps_legit_player_2",
+    "data": {
+      "kills": 22,
+      "deaths": 17,
+      "assists": 4,
+      "weapon_stats": {
+        "rifle": {
+          "shots_fired": 150,
+          "hits": 70,
+          "headshots": 18,
+          "distance_meters": [17.3, 25.6, 20.1, 15.7, 30.5, 22.8]
+        },
+        "sniper": {
+          "shots_fired": 15,
+          "hits": 10,
+          "headshots": 8,
+          "distance_meters": [45.2, 38.7, 50.1, 42.3]
+        }
+      },
+      "average_position_change": 8.2,
+      "camping_seconds": 25,
+      "round_duration_seconds": 300,
+      "team": "T",
+      "training_label": 0.0
+    }
+  },
+  {
+    "player_id": "fps_cheater_player_1",
+    "data": {
+      "kills": 38,
+      "deaths": 4,
+      "assists": 5,
+      "weapon_stats": {
+        "rifle": {
+          "shots_fired": 100,
+          "hits": 92,
+          "headshots": 75,
+          "distance_meters": [20.3, 25.7, 30.2, 18.9, 35.4]
+        },
+        "pistol": {
+          "shots_fired": 35,
+          "hits": 32,
+          "headshots": 28,
+          "distance_meters": [12.5, 15.3, 8.7, 9.2]
+        }
+      },
+      "average_position_change": 5.4,
+      "camping_seconds": 10,
+      "round_duration_seconds": 300,
+      "team": "T",
+      "training_label": 1.0
+    }
+  },
+  {
+    "player_id": "fps_cheater_player_2",
+    "data": {
+      "kills": 42,
+      "deaths": 5,
+      "assists": 3,
+      "weapon_stats": {
+        "sniper": {
+          "shots_fired": 50,
+          "hits": 48,
+          "headshots": 45,
+          "distance_meters": [60.2, 55.7, 48.3, 70.1, 65.4]
+        },
+        "pistol": {
+          "shots_fired": 20,
+          "hits": 19,
+          "headshots": 17,
+          "distance_meters": [10.5, 8.7, 12.3]
+        }
+      },
+      "average_position_change": 6.2,
+      "camping_seconds": 15,
+      "round_duration_seconds": 300,
+      "team": "CT",
+      "training_label": 1.0
+    }
+  }
+]

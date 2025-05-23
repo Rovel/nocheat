@@ -1,0 +1,194 @@
+[
+  {
+    "player_id": "br_legit_player_1",
+    "data": {
+      "match_id": "BR-2025-05-23-001",
+      "placement": 5,
+      "survival_time_seconds": 1320,
+      "kills": 6,
+      "damage_dealt": 1250,
+      "damage_taken": 850,
+      "revives": 2,
+      "distance_traveled": {
+        "walking": 2500,
+        "swimming": 150,
+        "driving": 4200,
+        "flying": 0
+      },
+      "loot_collected": {
+        "weapons": 5,
+        "ammo": 250,
+        "healing": 12,
+        "armor": 3,
+        "attachments": 8
+      },
+      "weapon_stats": {
+        "assault_rifle": {
+          "shots_fired": 120,
+          "hits": 48,
+          "headshots": 8,
+          "damage": 720
+        },
+        "shotgun": {
+          "shots_fired": 18,
+          "hits": 12,
+          "headshots": 3,
+          "damage": 380
+        },
+        "sniper": {
+          "shots_fired": 10,
+          "hits": 4,
+          "headshots": 2,
+          "damage": 150
+        }
+      },
+      "hot_drop": true,
+      "team_size": 3,
+      "training_label": 0.0
+    }
+  },
+  {
+    "player_id": "br_legit_player_2",
+    "data": {
+      "match_id": "BR-2025-05-23-002",
+      "placement": 1,
+      "survival_time_seconds": 1620,
+      "kills": 10,
+      "damage_dealt": 1850,
+      "damage_taken": 620,
+      "revives": 3,
+      "distance_traveled": {
+        "walking": 3200,
+        "swimming": 0,
+        "driving": 5800,
+        "flying": 1200
+      },
+      "loot_collected": {
+        "weapons": 7,
+        "ammo": 320,
+        "healing": 18,
+        "armor": 4,
+        "attachments": 12
+      },
+      "weapon_stats": {
+        "assault_rifle": {
+          "shots_fired": 180,
+          "hits": 72,
+          "headshots": 15,
+          "damage": 1080
+        },
+        "smg": {
+          "shots_fired": 120,
+          "hits": 55,
+          "headshots": 8,
+          "damage": 440
+        },
+        "sniper": {
+          "shots_fired": 15,
+          "hits": 8,
+          "headshots": 4,
+          "damage": 330
+        }
+      },
+      "hot_drop": false,
+      "team_size": 3,
+      "training_label": 0.0
+    }
+  },
+  {
+    "player_id": "br_cheater_player_1",
+    "data": {
+      "match_id": "BR-2025-05-23-003",
+      "placement": 1,
+      "survival_time_seconds": 1580,
+      "kills": 28,
+      "damage_dealt": 4850,
+      "damage_taken": 350,
+      "revives": 0,
+      "distance_traveled": {
+        "walking": 4800,
+        "swimming": 0,
+        "driving": 8500,
+        "flying": 0
+      },
+      "loot_collected": {
+        "weapons": 4,
+        "ammo": 280,
+        "healing": 15,
+        "armor": 3,
+        "attachments": 10
+      },
+      "weapon_stats": {
+        "assault_rifle": {
+          "shots_fired": 250,
+          "hits": 225,
+          "headshots": 180,
+          "damage": 3375
+        },
+        "pistol": {
+          "shots_fired": 45,
+          "hits": 40,
+          "headshots": 35,
+          "damage": 600
+        },
+        "sniper": {
+          "shots_fired": 25,
+          "hits": 22,
+          "headshots": 20,
+          "damage": 875
+        }
+      },
+      "hot_drop": true,
+      "team_size": 3,
+      "training_label": 1.0
+    }
+  },
+  {
+    "player_id": "br_cheater_player_2",
+    "data": {
+      "match_id": "BR-2025-05-23-004",
+      "placement": 1,
+      "survival_time_seconds": 1680,
+      "kills": 32,
+      "damage_dealt": 5200,
+      "damage_taken": 280,
+      "revives": 1,
+      "distance_traveled": {
+        "walking": 5200,
+        "swimming": 300,
+        "driving": 7800,
+        "flying": 2000
+      },
+      "loot_collected": {
+        "weapons": 6,
+        "ammo": 350,
+        "healing": 20,
+        "armor": 4,
+        "attachments": 15
+      },
+      "weapon_stats": {
+        "assault_rifle": {
+          "shots_fired": 280,
+          "hits": 252,
+          "headshots": 210,
+          "damage": 3780
+        },
+        "smg": {
+          "shots_fired": 150,
+          "hits": 135,
+          "headshots": 110,
+          "damage": 1080
+        },
+        "sniper": {
+          "shots_fired": 12,
+          "hits": 10,
+          "headshots": 9,
+          "damage": 340
+        }
+      },
+      "hot_drop": false,
+      "team_size": 3,
+      "training_label": 1.0
+    }
+  }
+]

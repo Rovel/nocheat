@@ -1,0 +1,162 @@
+[
+  {
+    "player_id": "racing_legit_player_1",
+    "data": {
+      "track_id": "Monaco",
+      "car_model": "Formula X",
+      "finish_position": 3,
+      "finish_time_seconds": 5423.82,
+      "best_lap_time_seconds": 84.32,
+      "average_lap_time_seconds": 85.78,
+      "lap_times": [88.45, 86.21, 85.67, 84.32, 84.98, 85.12],
+      "penalties": {
+        "corner_cutting": 1,
+        "speeding": 0,
+        "collision": 2
+      },
+      "telemetry": {
+        "top_speed_kmh": 332.5,
+        "average_speed_kmh": 215.8,
+        "gear_changes": 487,
+        "braking_points": 378,
+        "acceleration_events": 382,
+        "drift_angles": [12.5, 15.2, 8.7, 18.3, 10.5]
+      },
+      "sectors": [
+        {"sector_id": 1, "times": [28.34, 28.12, 27.98, 27.45, 27.89, 28.01]},
+        {"sector_id": 2, "times": [31.21, 30.78, 30.45, 30.12, 30.34, 30.28]},
+        {"sector_id": 3, "times": [28.90, 27.31, 27.24, 26.75, 26.75, 26.83]}
+      ],
+      "pit_stops": 1,
+      "fuel_consumption": 75.8,
+      "tire_wear": {
+        "front_left": 68.5,
+        "front_right": 72.3,
+        "rear_left": 65.7,
+        "rear_right": 70.2
+      },
+      "weather_conditions": "Dry",
+      "training_label": 0.0
+    }
+  },
+  {
+    "player_id": "racing_legit_player_2",
+    "data": {
+      "track_id": "Silverstone",
+      "car_model": "GT Racer",
+      "finish_position": 1,
+      "finish_time_seconds": 6215.45,
+      "best_lap_time_seconds": 90.15,
+      "average_lap_time_seconds": 91.42,
+      "lap_times": [93.25, 92.10, 91.85, 90.15, 90.82, 91.37, 90.38],
+      "penalties": {
+        "corner_cutting": 0,
+        "speeding": 0,
+        "collision": 1
+      },
+      "telemetry": {
+        "top_speed_kmh": 295.8,
+        "average_speed_kmh": 187.3,
+        "gear_changes": 528,
+        "braking_points": 420,
+        "acceleration_events": 426,
+        "drift_angles": [10.2, 12.8, 8.4, 11.7, 9.2]
+      },
+      "sectors": [
+        {"sector_id": 1, "times": [30.12, 29.85, 29.62, 29.18, 29.35, 29.58, 29.20]},
+        {"sector_id": 2, "times": [32.45, 31.98, 31.75, 31.22, 31.43, 31.65, 31.28]},
+        {"sector_id": 3, "times": [30.68, 30.27, 30.48, 29.75, 30.04, 30.14, 29.90]}
+      ],
+      "pit_stops": 1,
+      "fuel_consumption": 82.3,
+      "tire_wear": {
+        "front_left": 72.8,
+        "front_right": 78.5,
+        "rear_left": 68.2,
+        "rear_right": 75.1
+      },
+      "weather_conditions": "Wet",
+      "training_label": 0.0
+    }
+  },
+  {
+    "player_id": "racing_cheater_player_1",
+    "data": {
+      "track_id": "Monza",
+      "car_model": "Formula X",
+      "finish_position": 1,
+      "finish_time_seconds": 4205.32,
+      "best_lap_time_seconds": 72.18,
+      "average_lap_time_seconds": 72.51,
+      "lap_times": [73.25, 72.48, 72.18, 72.20, 72.45, 72.50],
+      "penalties": {
+        "corner_cutting": 0,
+        "speeding": 0,
+        "collision": 0
+      },
+      "telemetry": {
+        "top_speed_kmh": 372.5,
+        "average_speed_kmh": 265.8,
+        "gear_changes": 412,
+        "braking_points": 328,
+        "acceleration_events": 332,
+        "drift_angles": [5.2, 4.8, 3.7, 5.5, 4.2]
+      },
+      "sectors": [
+        {"sector_id": 1, "times": [23.85, 23.70, 23.52, 23.55, 23.58, 23.62]},
+        {"sector_id": 2, "times": [26.25, 26.08, 25.98, 25.95, 26.12, 26.08]},
+        {"sector_id": 3, "times": [23.15, 22.70, 22.68, 22.70, 22.75, 22.80]}
+      ],
+      "pit_stops": 0,
+      "fuel_consumption": 58.2,
+      "tire_wear": {
+        "front_left": 45.2,
+        "front_right": 48.5,
+        "rear_left": 42.8,
+        "rear_right": 46.3
+      },
+      "weather_conditions": "Dry",
+      "training_label": 1.0
+    }
+  },
+  {
+    "player_id": "racing_cheater_player_2",
+    "data": {
+      "track_id": "Spa",
+      "car_model": "GT Racer",
+      "finish_position": 1,
+      "finish_time_seconds": 5123.75,
+      "best_lap_time_seconds": 78.35,
+      "average_lap_time_seconds": 78.82,
+      "lap_times": [79.85, 79.12, 78.65, 78.35, 78.42, 78.53],
+      "penalties": {
+        "corner_cutting": 0,
+        "speeding": 0,
+        "collision": 0
+      },
+      "telemetry": {
+        "top_speed_kmh": 338.2,
+        "average_speed_kmh": 242.5,
+        "gear_changes": 452,
+        "braking_points": 365,
+        "acceleration_events": 368,
+        "drift_angles": [4.8, 5.3, 3.2, 4.7, 3.8]
+      },
+      "sectors": [
+        {"sector_id": 1, "times": [25.45, 25.28, 25.12, 25.05, 25.10, 25.15]},
+        {"sector_id": 2, "times": [28.85, 28.52, 28.33, 28.20, 28.22, 28.28]},
+        {"sector_id": 3, "times": [25.55, 25.32, 25.20, 25.10, 25.10, 25.10]}
+      ],
+      "pit_stops": 0,
+      "fuel_consumption": 65.8,
+      "tire_wear": {
+        "front_left": 52.3,
+        "front_right": 56.7,
+        "rear_left": 48.5,
+        "rear_right": 53.2
+      },
+      "weather_conditions": "Dry",
+      "training_label": 1.0
+    }
+  }
+]

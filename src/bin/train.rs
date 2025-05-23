@@ -1,4 +1,4 @@
-use nocheat::types::PlayerStats;
+use nocheat::types::LegacyPlayerStats;
 use nocheat::{generate_default_model, train_model};
 use std::env;
 use std::fs::File;
@@ -59,21 +59,17 @@ fn main() -> io::Result<()> {
             let file = File::open(training_data_path)?;
             let mut reader = BufReader::new(file);
             let mut contents = String::new();
-            reader.read_to_string(&mut contents)?;
-
-            // Parse the JSON into PlayerStats and labels
-            let training_data: Vec<PlayerStats> = match serde_json::from_str(&contents) {
+            reader.read_to_string(&mut contents)?; // Parse the JSON into PlayerStats and labels
+            let training_data: Vec<LegacyPlayerStats> = match serde_json::from_str(&contents) {
                 Ok(data) => data,
                 Err(e) => {
                     eprintln!("Error parsing training data: {}", e);
                     process::exit(1);
                 }
-            };
-
-            // Extract labels from the training data
+            }; // Extract labels from the training data
             let labels: Vec<f64> = training_data
                 .iter()
-                .filter_map(|stat| stat.training_label)
+                .filter_map(|stat| stat.data.training_label)
                 .collect();
 
             // Verify we have valid training data

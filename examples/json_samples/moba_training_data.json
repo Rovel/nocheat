@@ -1,0 +1,130 @@
+[
+  {
+    "player_id": "moba_legit_player_1",
+    "data": {
+      "champion": "Warrior",
+      "level": 18,
+      "gold_earned": 12500,
+      "gold_spent": 11800,
+      "kills": 7,
+      "deaths": 4,
+      "assists": 12,
+      "damage_stats": {
+        "physical_damage_dealt": 28500,
+        "magic_damage_dealt": 5200,
+        "true_damage_dealt": 1200,
+        "damage_to_champions": 15600
+      },
+      "healing": 3500,
+      "damage_mitigated": 22000,
+      "vision_score": 25,
+      "crowd_control_score": 35,
+      "skill_timings": [
+        {"skill": "Q", "timestamps_ms": [4500, 9200, 15600, 22300, 28700]},
+        {"skill": "W", "timestamps_ms": [3200, 10500, 17800, 25100, 32400]},
+        {"skill": "E", "timestamps_ms": [6800, 12100, 18400, 24700, 31000]},
+        {"skill": "R", "timestamps_ms": [16200, 42500]}
+      ],
+      "item_build_order": [2003, 1055, 3047, 6333, 3068, 3143],
+      "team": "blue",
+      "match_duration_seconds": 1850,
+      "training_label": 0.0
+    }
+  },
+  {
+    "player_id": "moba_legit_player_2",
+    "data": {
+      "champion": "Mage",
+      "level": 18,
+      "gold_earned": 14200,
+      "gold_spent": 13700,
+      "kills": 12,
+      "deaths": 6,
+      "assists": 8,
+      "damage_stats": {
+        "physical_damage_dealt": 8500,
+        "magic_damage_dealt": 45200,
+        "true_damage_dealt": 2800,
+        "damage_to_champions": 32600
+      },
+      "healing": 2500,
+      "damage_mitigated": 9000,
+      "vision_score": 35,
+      "crowd_control_score": 28,
+      "skill_timings": [
+        {"skill": "Q", "timestamps_ms": [3800, 8500, 13200, 17900, 22600]},
+        {"skill": "W", "timestamps_ms": [5100, 9800, 14500, 19200, 23900]},
+        {"skill": "E", "timestamps_ms": [6400, 11100, 15800, 20500, 25200]},
+        {"skill": "R", "timestamps_ms": [12500, 38900]}
+      ],
+      "item_build_order": [1056, 3020, 3165, 3089, 3135, 3157],
+      "team": "red",
+      "match_duration_seconds": 1850,
+      "training_label": 0.0
+    }
+  },
+  {
+    "player_id": "moba_cheater_player_1",
+    "data": {
+      "champion": "Marksman",
+      "level": 18,
+      "gold_earned": 18500,
+      "gold_spent": 17200,
+      "kills": 25,
+      "deaths": 1,
+      "assists": 5,
+      "damage_stats": {
+        "physical_damage_dealt": 85000,
+        "magic_damage_dealt": 3500,
+        "true_damage_dealt": 4200,
+        "damage_to_champions": 52000
+      },
+      "healing": 4800,
+      "damage_mitigated": 12000,
+      "vision_score": 18,
+      "crowd_control_score": 5,
+      "skill_timings": [
+        {"skill": "Q", "timestamps_ms": [2550, 5050, 7550, 10050, 12550]},
+        {"skill": "W", "timestamps_ms": [3300, 5800, 8300, 10800, 13300]},
+        {"skill": "E", "timestamps_ms": [1800, 4300, 6800, 9300, 11800]},
+        {"skill": "R", "timestamps_ms": [8200, 23500, 38800]}
+      ],
+      "item_build_order": [1055, 3006, 3031, 3094, 3036, 3072],
+      "team": "blue",
+      "match_duration_seconds": 1850,
+      "training_label": 1.0
+    }
+  },
+  {
+    "player_id": "moba_cheater_player_2",
+    "data": {
+      "champion": "Assassin",
+      "level": 18,
+      "gold_earned": 17800,
+      "gold_spent": 16900,
+      "kills": 22,
+      "deaths": 3,
+      "assists": 3,
+      "damage_stats": {
+        "physical_damage_dealt": 62000,
+        "magic_damage_dealt": 18000,
+        "true_damage_dealt": 7500,
+        "damage_to_champions": 48000
+      },
+      "healing": 6200,
+      "damage_mitigated": 8500,
+      "vision_score": 12,
+      "crowd_control_score": 8,
+      "skill_timings": [
+        {"skill": "Q", "timestamps_ms": [2200, 4700, 7200, 9700, 12200]},
+        {"skill": "W", "timestamps_ms": [3500, 6000, 8500, 11000, 13500]},
+        {"skill": "E", "timestamps_ms": [1500, 4000, 6500, 9000, 11500]},
+        {"skill": "R", "timestamps_ms": [7500, 22800, 38100]}
+      ],
+      "item_build_order": [1036, 3142, 3147, 3071, 3814, 3074],
+      "team": "red",
+      "match_duration_seconds": 1850,
+      "training_label": 1.0
+    }
+  }
+]

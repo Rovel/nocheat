@@ -1,0 +1,32 @@
+[
+  {
+    "player_id": "rts_legit_player_1",
+    "data": {
+      "build_order": ["Barracks", "Factory", "Starport"],
+      "units_trained": 30,
+      "units_destroyed": 25,
+      "resources_gathered": {
+        "minerals": 15000,
+        "vespene": 3500
+      },
+      "average_apm": 200,
+      "game_duration_seconds": 1200,
+      "training_label": 0.0
+    }
+  },
+  {
+    "player_id": "rts_cheater_player_1",
+    "data": {
+      "build_order": ["GhostAcademy", "NukeSilo", "TechLab", "Starport"],
+      "units_trained": 80,
+      "units_destroyed": 75,
+      "resources_gathered": {
+        "minerals": 50000,
+        "vespene": 16000
+      },
+      "average_apm": 400,
+      "game_duration_seconds": 1200,
+      "training_label": 1.0
+    }
+  }
+]

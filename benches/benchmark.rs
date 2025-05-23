@@ -1,10 +1,10 @@
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
-use nocheat::types::PlayerStats;
+use nocheat::types::{DefaultPlayerData, LegacyPlayerStats, PlayerStats};
 use nocheat::{build_dataframe, df_to_ndarray, generate_default_model, train_model};
 use polars::prelude::{col, DataType, IntoLazy};
 use std::collections::HashMap;
 
-fn make_dummy_stats(n: usize) -> Vec<PlayerStats> {
+fn make_dummy_stats(n: usize) -> Vec<LegacyPlayerStats> {
     let mut result = Vec::with_capacity(n);
 
     for i in 0..n {
@@ -25,20 +25,21 @@ fn make_dummy_stats(n: usize) -> Vec<PlayerStats> {
         let total_hits = (150.0 * accuracy) as u32;
         let headshots = (total_hits as f32 * headshot_ratio) as u32;
 
-        result.push(PlayerStats {
-            player_id: format!("player_{}", i),
+        let player_data = DefaultPlayerData {
             shots_fired: shots,
-            hits: hits,
-            headshots: headshots,
+            hits,
+            headshots,
             shot_timestamps_ms: None,
             training_label: None,
-        });
+        };
+
+        result.push(PlayerStats::new(format!("player_{}", i), player_data));
     }
 
     result
 }
 
-fn create_training_data(n: usize) -> (Vec<PlayerStats>, Vec<f64>) {
+fn create_training_data(n: usize) -> (Vec<LegacyPlayerStats>, Vec<f64>) {
     let mut players = Vec::with_capacity(n);
     let mut labels = Vec::with_capacity(n);
 
@@ -56,19 +57,18 @@ fn create_training_data(n: usize) -> (Vec<PlayerStats>, Vec<f64>) {
         let headshot_ratio = 0.1 + (i % 15) as f32 * 0.01; // 10-25% headshots
         let headshots = ((100.0 * accuracy) as f32 * headshot_ratio) as u32;
 
-        players.push(PlayerStats {
-            player_id: format!("normal_{}", i),
+        let player_data = DefaultPlayerData {
             shots_fired: shots,
-            hits: hits,
-            headshots: headshots,
+            hits,
+            headshots,
             shot_timestamps_ms: None,
             training_label: None,
-        });
+        };
+
+        players.push(PlayerStats::new(format!("normal_{}", i), player_data));
 
         labels.push(0.0);
-    }
-
-    // Create half cheaters
+    } // Create half cheaters
     for i in 0..(n / 2) {
         let mut shots = HashMap::new();
         let mut hits = HashMap::new();
@@ -82,14 +82,15 @@ fn create_training_data(n: usize) -> (Vec<PlayerStats>, Vec<f64>) {
         let headshot_ratio = 0.4 + (i % 40) as f32 * 0.01; // 40-80% headshots
         let headshots = ((100.0 * accuracy) as f32 * headshot_ratio) as u32;
 
-        players.push(PlayerStats {
-            player_id: format!("cheater_{}", i),
+        let player_data = DefaultPlayerData {
             shots_fired: shots,
-            hits: hits,
-            headshots: headshots,
+            hits,
+            headshots,
             shot_timestamps_ms: None,
             training_label: None,
-        });
+        };
+
+        players.push(PlayerStats::new(format!("cheater_{}", i), player_data));
 
         labels.push(1.0);
     }

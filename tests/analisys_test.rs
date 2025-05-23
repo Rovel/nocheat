@@ -1,23 +1,24 @@
-use nocheat::types::PlayerStats;
+use nocheat::types::{DefaultPlayerData, LegacyPlayerStats, PlayerStats};
 use nocheat::{analyze_stats, build_dataframe, df_to_ndarray, generate_default_model, train_model};
 use polars::prelude::{col, DataType, IntoLazy};
 use std::collections::HashMap;
 use std::fs;
 
-fn make_dummy_stats() -> Vec<PlayerStats> {
+fn make_dummy_stats() -> Vec<LegacyPlayerStats> {
     let mut shots = HashMap::new();
     shots.insert("rifle".to_string(), 100);
     let mut hits = HashMap::new();
     hits.insert("rifle".to_string(), 50);
 
-    vec![PlayerStats {
-        player_id: "player1".to_string(),
+    let player_data = DefaultPlayerData {
         shots_fired: shots,
         hits,
         headshots: 10,
         shot_timestamps_ms: None,
         training_label: None,
-    }]
+    };
+
+    vec![PlayerStats::new("player1".to_string(), player_data)]
 }
 
 #[test]
@@ -84,14 +85,15 @@ fn test_training_workflow() {
         let headshot_ratio = 0.1 + (i % 10) as f32 * 0.01;
         let headshots = (hit_count as f32 * headshot_ratio) as u32;
 
-        training_data.push(PlayerStats {
-            player_id: format!("normal_{}", i),
+        let player_data = DefaultPlayerData {
             shots_fired: shots,
             hits: hits,
             headshots,
             shot_timestamps_ms: None,
             training_label: Some(0.0),
-        });
+        };
+
+        training_data.push(PlayerStats::new(format!("normal_{}", i), player_data));
 
         labels.push(0.0); // Not a cheater
     }
@@ -113,14 +115,15 @@ fn test_training_workflow() {
         let headshot_ratio = 0.4 + (i % 30) as f32 * 0.01;
         let headshots = (hit_count as f32 * headshot_ratio) as u32;
 
-        training_data.push(PlayerStats {
-            player_id: format!("cheater_{}", i),
+        let player_data = DefaultPlayerData {
             shots_fired: shots,
             hits: hits,
             headshots,
             shot_timestamps_ms: None,
             training_label: Some(1.0),
-        });
+        };
+
+        training_data.push(PlayerStats::new(format!("cheater_{}", i), player_data));
 
         labels.push(1.0); // Labeled as a cheater
     }
@@ -141,8 +144,7 @@ fn test_training_workflow() {
     let mut hits_normal = HashMap::new();
     hits_normal.insert("rifle".to_string(), 50); // 50% accuracy
 
-    let normal_player = PlayerStats {
-        player_id: "test_normal".to_string(),
+    let normal_data = DefaultPlayerData {
         shots_fired: test_normal,
         hits: hits_normal,
         headshots: 10, // 20% headshot ratio
@@ -150,19 +152,22 @@ fn test_training_workflow() {
         training_label: None,
     };
 
+    let normal_player = PlayerStats::new("test_normal".to_string(), normal_data);
+
     let mut test_suspicious = HashMap::new();
     test_suspicious.insert("rifle".to_string(), 100);
     let mut hits_suspicious = HashMap::new();
     hits_suspicious.insert("rifle".to_string(), 90); // 90% accuracy
 
-    let suspicious_player = PlayerStats {
-        player_id: "test_suspicious".to_string(),
+    let suspicious_data = DefaultPlayerData {
         shots_fired: test_suspicious,
         hits: hits_suspicious,
         headshots: 70, // 78% headshot ratio
         shot_timestamps_ms: None,
         training_label: None,
     };
+
+    let suspicious_player = PlayerStats::new("test_suspicious".to_string(), suspicious_data);
 
     // Save the original model file path if it exists, so we can restore it after the test
     let original_model_exists = std::path::Path::new("cheat_model.bin").exists();
@@ -197,11 +202,9 @@ fn test_training_workflow() {
     assert!(result.is_ok(), "Analysis failed");
 
     let analysis = result.unwrap();
-    assert_eq!(analysis.results.len(), 2, "Expected 2 analysis results");
-
-    // 5. Verify the results - normal player should have low score, suspicious high score
-    let normal_score = analysis.results[0].suspicion_score;
-    let suspicious_score = analysis.results[1].suspicion_score;
+    assert_eq!(analysis.results.len(), 2, "Expected 2 analysis results"); // 5. Verify the results - normal player should have low score, suspicious high score
+    let normal_score = analysis.results[0].data.suspicion_score;
+    let suspicious_score = analysis.results[1].data.suspicion_score;
 
     println!("Normal player score: {}", normal_score);
     println!("Suspicious player score: {}", suspicious_score);
@@ -254,14 +257,15 @@ fn test_generate_default_model() {
     let mut hits = HashMap::new();
     hits.insert("rifle".to_string(), 95); // 95% accuracy
 
-    let suspicious_player = PlayerStats {
-        player_id: "suspicious".to_string(),
+    let suspicious_data = DefaultPlayerData {
         shots_fired: shots,
         hits: hits,
         headshots: 80, // 84% headshot ratio (very suspicious)
         shot_timestamps_ms: None,
         training_label: None,
     };
+
+    let suspicious_player = PlayerStats::new("suspicious".to_string(), suspicious_data);
 
     // Save the original model file path if it exists, so we can restore it after the test
     let original_model_exists = std::path::Path::new("cheat_model.bin").exists();
@@ -293,9 +297,8 @@ fn test_generate_default_model() {
     }
 
     assert!(analysis.is_ok(), "Analysis with default model failed");
-
     let result = analysis.unwrap();
-    let score = result.results[0].suspicion_score;
+    let score = result.results[0].data.suspicion_score;
     println!("Suspicious player score: {}", score);
 
     // With such suspicious stats, the score should be high

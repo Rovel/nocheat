@@ -10,14 +10,15 @@ This library uses a RandomForest classifier to analyze player statistics and ide
 - Machine learning-based detection
 - C-compatible FFI for integration with game engines
 - DataFrame-based feature engineering
+- Generic struct support for custom data analysis
 
 ## Usage Examples
 
-Simple usage from Rust:
+Simple usage with the default data structures:
 
 ```rust
-use nocheat::{analyze_stats};
-use nocheat::types::{PlayerStats, AnalysisResponse};
+use nocheat::analyze_stats;
+use nocheat::types::{DefaultPlayerData, PlayerStats};
 use std::collections::HashMap;
 
 // Prepare player statistics
@@ -26,14 +27,15 @@ shots.insert("rifle".to_string(), 100);
 let mut hits = HashMap::new();
 hits.insert("rifle".to_string(), 80);  // Unusually high accuracy
 
-let player_stats = PlayerStats {
-    player_id: "player123".to_string(),
+let player_data = DefaultPlayerData {
     shots_fired: shots,
     hits: hits,
     headshots: 60,
     shot_timestamps_ms: None,
     training_label: None,
 };
+
+let player_stats = PlayerStats::new("player123".to_string(), player_data);
 
 // Analyze the stats
 let analysis = analyze_stats(vec![player_stats]);
@@ -54,7 +56,10 @@ use std::{fs::File, ptr};
 use std::collections::HashMap;
 
 pub mod types;
-use types::{AnalysisResponse, PlayerResult, PlayerStats};
+use types::{
+    DefaultAnalysisResult, DefaultPlayerData, LegacyAnalysisResponse, LegacyPlayerResult,
+    LegacyPlayerStats, PlayerStats,
+};
 
 /// Public wrapper for statistical analysis of player data to detect cheating.
 ///
@@ -64,17 +69,17 @@ use types::{AnalysisResponse, PlayerResult, PlayerStats};
 ///
 /// # Arguments
 ///
-/// * `stats` - A vector of PlayerStats structures containing data to analyze
+/// * `stats` - A vector of LegacyPlayerStats structures containing data to analyze
 ///
 /// # Returns
 ///
-/// * `Result<AnalysisResponse>` - The analysis results wrapped in a Result
+/// * `Result<LegacyAnalysisResponse>` - The analysis results wrapped in a Result
 ///
 /// # Example
 ///
 /// ```no_run
 /// use nocheat::{analyze_stats};
-/// use nocheat::types::PlayerStats;
+/// use nocheat::types::{DefaultPlayerData, PlayerStats};
 /// use std::collections::HashMap;
 ///
 /// // Create player statistics
@@ -83,19 +88,20 @@ use types::{AnalysisResponse, PlayerResult, PlayerStats};
 /// let mut hits = HashMap::new();
 /// hits.insert("rifle".to_string(), 50);
 ///
-/// let stats = vec![PlayerStats {
-///     player_id: "player123".to_string(),
+/// let player_data = DefaultPlayerData {
 ///     shots_fired: shots,
 ///     hits: hits,
 ///     headshots: 10,
 ///     shot_timestamps_ms: None,
 ///     training_label: None,
-/// }];
+/// };
+///
+/// let stats = vec![PlayerStats::new("player123".to_string(), player_data)];
 ///
 /// let results = analyze_stats(stats).expect("Analysis failed");
 /// assert_eq!(results.results.len(), 1);
 /// ```
-pub fn analyze_stats(stats: Vec<PlayerStats>) -> Result<AnalysisResponse> {
+pub fn analyze_stats(stats: Vec<LegacyPlayerStats>) -> Result<LegacyAnalysisResponse> {
     do_analysis(stats)
 }
 
@@ -131,7 +137,7 @@ fn load_model(path: &str) -> Result<RandomForestClassifier> {
 ///
 /// ```
 /// use nocheat::{build_dataframe};
-/// use nocheat::types::PlayerStats;
+/// use nocheat::types::{DefaultPlayerData, PlayerStats};
 /// use std::collections::HashMap;
 ///
 /// // Create test player statistics
@@ -140,23 +146,27 @@ fn load_model(path: &str) -> Result<RandomForestClassifier> {
 /// let mut hits = HashMap::new();
 /// hits.insert("rifle".to_string(), 50);
 ///
-/// let stats = vec![PlayerStats {
-///     player_id: "player123".to_string(),
+/// let player_data = DefaultPlayerData {
 ///     shots_fired: shots,
 ///     hits: hits,
 ///     headshots: 10,
 ///     shot_timestamps_ms: None,
 ///     training_label: None,
-/// }];
+/// };
+///
+/// let stats = vec![PlayerStats::new("player123".to_string(), player_data)];
 ///
 /// let df = build_dataframe(&stats).expect("DataFrame creation failed");
 /// assert_eq!(df.height(), 1);
 /// ```
-pub fn build_dataframe(stats: &[PlayerStats]) -> Result<DataFrame> {
+pub fn build_dataframe(stats: &[LegacyPlayerStats]) -> Result<DataFrame> {
     let ids: Vec<&str> = stats.iter().map(|p| p.player_id.as_str()).collect();
-    let shots: Vec<u32> = stats.iter().map(|p| p.shots_fired.values().sum()).collect();
-    let hits: Vec<u32> = stats.iter().map(|p| p.hits.values().sum()).collect();
-    let headshots: Vec<u32> = stats.iter().map(|p| p.headshots).collect();
+    let shots: Vec<u32> = stats
+        .iter()
+        .map(|p| p.data.shots_fired.values().sum())
+        .collect();
+    let hits: Vec<u32> = stats.iter().map(|p| p.data.hits.values().sum()).collect();
+    let headshots: Vec<u32> = stats.iter().map(|p| p.data.headshots).collect();
 
     let df = df! {
         "player_id" => ids,
@@ -186,7 +196,7 @@ pub fn build_dataframe(stats: &[PlayerStats]) -> Result<DataFrame> {
 /// ```no_run
 /// // Note: This example is marked as no_run to avoid compilation issues in doctests
 /// use nocheat::{build_dataframe, df_to_ndarray};
-/// use nocheat::types::PlayerStats;
+/// use nocheat::types::{DefaultPlayerData, PlayerStats};
 /// use std::collections::HashMap;
 /// use polars::prelude::{col, IntoLazy, DataType};
 ///
@@ -196,14 +206,15 @@ pub fn build_dataframe(stats: &[PlayerStats]) -> Result<DataFrame> {
 /// let mut hits = HashMap::new();
 /// hits.insert("rifle".to_string(), 50);
 ///
-/// let stats = vec![PlayerStats {
-///     player_id: "player123".to_string(),
+/// let player_data = DefaultPlayerData {
 ///     shots_fired: shots,
 ///     hits: hits,
 ///     headshots: 10,
 ///     shot_timestamps_ms: None,
 ///     training_label: None,
-/// }];
+/// };
+///
+/// let stats = vec![PlayerStats::new("player123".to_string(), player_data)];
 ///
 /// let df = build_dataframe(&stats).expect("DataFrame creation failed");
 ///
@@ -232,7 +243,7 @@ pub fn df_to_ndarray(df: &DataFrame, cols: &[&str]) -> Result<Array2<f32>> {
 }
 
 /// Core analysis function: feature engineering + RF inference
-fn do_analysis(stats: Vec<PlayerStats>) -> Result<AnalysisResponse> {
+fn do_analysis(stats: Vec<LegacyPlayerStats>) -> Result<LegacyAnalysisResponse> {
     // Check if we can load the model (for debugging)
     if !std::path::Path::new(unsafe { CURRENT_MODEL_PATH }).exists() {
         return Err(anyhow::anyhow!("{} does not exist", unsafe {
@@ -279,14 +290,16 @@ fn do_analysis(stats: Vec<PlayerStats>) -> Result<AnalysisResponse> {
             flags.push("HighHitRate".to_string());
         }
 
-        results.push(PlayerResult {
-            player_id: stat.player_id,
-            suspicion_score: score,
-            flags,
-        });
+        results.push(LegacyPlayerResult::new(
+            stat.player_id,
+            DefaultAnalysisResult {
+                suspicion_score: score,
+                flags,
+            },
+        ));
     }
 
-    Ok(AnalysisResponse { results })
+    Ok(LegacyAnalysisResponse { results })
 }
 
 /// Train a new cheat detection model and save it to disk.
@@ -307,8 +320,8 @@ fn do_analysis(stats: Vec<PlayerStats>) -> Result<AnalysisResponse> {
 /// # Example
 ///
 /// ```no_run
-/// use nocheat::{train_model};
-/// use nocheat::types::PlayerStats;
+/// use nocheat::train_model;
+/// use nocheat::types::{DefaultPlayerData, PlayerStats};
 /// use std::collections::HashMap;
 ///
 /// // Create training data
@@ -321,14 +334,18 @@ fn do_analysis(stats: Vec<PlayerStats>) -> Result<AnalysisResponse> {
 /// let mut hits = HashMap::new();
 /// hits.insert("rifle".to_string(), 50); // 50% accuracy is normal
 ///
-/// training_data.push(PlayerStats {
-///     player_id: "normal_player".to_string(),
+/// let normal_player_data = DefaultPlayerData {
 ///     shots_fired: shots.clone(),
 ///     hits: hits.clone(),
 ///     headshots: 10, // 20% headshot ratio is normal
 ///     shot_timestamps_ms: None,
 ///     training_label: None,
-/// });
+/// };
+///
+/// training_data.push(PlayerStats::new(
+///     "normal_player".to_string(),
+///     normal_player_data
+/// ));
 /// labels.push(0.0); // Not a cheater
 ///
 /// // Example of a cheating player
@@ -337,21 +354,25 @@ fn do_analysis(stats: Vec<PlayerStats>) -> Result<AnalysisResponse> {
 /// let mut hits = HashMap::new();
 /// hits.insert("rifle".to_string(), 95); // 95% accuracy is suspicious
 ///
-/// training_data.push(PlayerStats {
-///     player_id: "cheater".to_string(),
+/// let cheater_player_data = DefaultPlayerData {
 ///     shots_fired: shots,
 ///     hits: hits,
 ///     headshots: 70, // 70% headshot ratio is very suspicious
 ///     shot_timestamps_ms: None,
 ///     training_label: None,
-/// });
+/// };
+///
+/// training_data.push(PlayerStats::new(
+///     "cheater".to_string(),
+///     cheater_player_data
+/// ));
 /// labels.push(1.0); // Labeled as a cheater
 ///
 /// // Train and save model
 /// train_model(training_data, labels, "cheat_model.bin").expect("Failed to train model");
 /// ```
 pub fn train_model(
-    training_data: Vec<PlayerStats>,
+    training_data: Vec<LegacyPlayerStats>,
     labels: Vec<f64>,
     output_path: &str,
 ) -> Result<()> {
@@ -467,14 +488,18 @@ pub fn generate_default_model(output_path: &str) -> Result<()> {
         let headshot_ratio = 0.1 + (i % 15) as f32 * 0.01;
         let headshots = (hit_count as f32 * headshot_ratio) as u32;
 
-        training_data.push(PlayerStats {
-            player_id: format!("normal_player_{}", i),
+        let player_data = DefaultPlayerData {
             shots_fired: shots,
             hits,
             headshots,
             shot_timestamps_ms: None,
             training_label: Some(0.0),
-        });
+        };
+
+        training_data.push(PlayerStats::new(
+            format!("normal_player_{}", i),
+            player_data,
+        ));
 
         labels.push(0.0); // Not a cheater
     }
@@ -498,14 +523,16 @@ pub fn generate_default_model(output_path: &str) -> Result<()> {
         let headshot_ratio = 0.4 + (i % 40) as f32 * 0.01;
         let headshots = (hit_count as f32 * headshot_ratio) as u32;
 
-        training_data.push(PlayerStats {
-            player_id: format!("cheater_{}", i),
-            shots_fired: shots,
-            hits,
-            headshots,
-            shot_timestamps_ms: None,
-            training_label: Some(1.0),
-        });
+        training_data.push(PlayerStats::new(
+            format!("cheater_{}", i),
+            DefaultPlayerData {
+                shots_fired: shots,
+                hits,
+                headshots,
+                shot_timestamps_ms: None,
+                training_label: Some(1.0),
+            },
+        ));
 
         labels.push(1.0); // Labeled as a cheater
     }
@@ -556,7 +583,7 @@ pub unsafe extern "C" fn analyze_round(
         return -1;
     }
     let input = std::slice::from_raw_parts(stats_json_ptr, stats_json_len);
-    let stats: Vec<PlayerStats> = match serde_json::from_slice(input) {
+    let stats: Vec<LegacyPlayerStats> = match serde_json::from_slice(input) {
         Ok(v) => v,
         Err(_) => return -2,
     };
@@ -593,7 +620,7 @@ pub unsafe extern "C" fn free_buffer(ptr: *mut c_uchar, len: size_t) {
 
 /// Serialize response and allocate C buffer
 fn write_buffer(
-    resp: &AnalysisResponse,
+    resp: &LegacyAnalysisResponse,
     out_json_ptr: *mut *mut c_uchar,
     out_json_len: *mut size_t,
 ) -> c_int {
@@ -677,7 +704,7 @@ mod tests {
     use std::collections::HashMap;
     use std::fs;
 
-    fn create_test_stats() -> Vec<PlayerStats> {
+    fn create_test_stats() -> Vec<LegacyPlayerStats> {
         let mut shots1 = HashMap::new();
         shots1.insert("rifle".to_string(), 100);
         let mut hits1 = HashMap::new();
@@ -691,22 +718,26 @@ mod tests {
         hits2.insert("pistol".to_string(), 45); // suspicious hit rate
 
         vec![
-            PlayerStats {
-                player_id: "normal_player".to_string(),
-                shots_fired: shots1,
-                hits: hits1,
-                headshots: 10,
-                shot_timestamps_ms: None,
-                training_label: None,
-            },
-            PlayerStats {
-                player_id: "suspicious_player".to_string(),
-                shots_fired: shots2,
-                hits: hits2,
-                headshots: 50, // suspicious headshot count
-                shot_timestamps_ms: None,
-                training_label: None,
-            },
+            PlayerStats::new(
+                "normal_player".to_string(),
+                DefaultPlayerData {
+                    shots_fired: shots1,
+                    hits: hits1,
+                    headshots: 10,
+                    shot_timestamps_ms: None,
+                    training_label: None,
+                },
+            ),
+            PlayerStats::new(
+                "suspicious_player".to_string(),
+                DefaultPlayerData {
+                    shots_fired: shots2,
+                    hits: hits2,
+                    headshots: 50, // suspicious headshot count
+                    shot_timestamps_ms: None,
+                    training_label: None,
+                },
+            ),
         ]
     }
 
@@ -796,14 +827,15 @@ mod tests {
         let mut hits = HashMap::new();
         hits.insert("rifle".to_string(), 50);
 
-        training_data.push(PlayerStats {
-            player_id: "normal_player".to_string(),
+        let player_data = DefaultPlayerData {
             shots_fired: shots,
             hits,
             headshots: 10,
             shot_timestamps_ms: None,
             training_label: None,
-        });
+        };
+
+        training_data.push(PlayerStats::new("normal_player".to_string(), player_data));
         labels.push(0.0);
 
         // Add a cheating player
@@ -812,14 +844,15 @@ mod tests {
         let mut hits = HashMap::new();
         hits.insert("rifle".to_string(), 95);
 
-        training_data.push(PlayerStats {
-            player_id: "cheater".to_string(),
+        let player_data = DefaultPlayerData {
             shots_fired: shots,
             hits,
             headshots: 70,
             shot_timestamps_ms: None,
             training_label: None,
-        });
+        };
+
+        training_data.push(PlayerStats::new("cheater".to_string(), player_data));
         labels.push(1.0);
 
         // Train the model
