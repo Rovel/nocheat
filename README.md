@@ -591,8 +591,39 @@ To customize the detection for your specific game, you can:
 
 ## License
 
-[Include your license information here]
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ## Contributing
 
-[Include contribution guidelines here]
+We welcome contributions from the community! By participating, you agree to abide by our [Code of Conduct](CODE_OF_CONDUCT.md).
+
+### Reporting Issues
+
+- Please search existing issues before opening a new one.
+- Provide a clear, descriptive title and detailed steps to reproduce.
+- Include rustc version, OS, and any relevant logs or outputs.
+
+### Pull Requests
+
+1. Fork the repository and create your branch from `main`.
+2. Follow the Rust style guidelines (run `cargo fmt` and `cargo clippy`).
+3. Write tests for your changes and ensure all existing tests pass (`cargo test`).
+4. Update documentation in `README.md` or `docs/` as needed.
+5. Submit a pull request with a clear description and link to any related issue.
+
+### Development Setup
+
+1. Install Rust via [rustup](https://rustup.rs/).
+2. Clone the repo: `git clone https://github.com/yourusername/nocheat.git`.
+3. Navigate into the project: `cd nocheat`.
+4. Build and test: `cargo build && cargo test`.
+5. Generate documentation: `cargo doc --open`.
+
+### Code Style
+
+- We use `rustfmt` for formatting and `clippy` for linting.
+- Please adhere to the existing code patterns and naming conventions.
+
+### License
+
+All contributions will be made under the MIT License, ensuring that the project remains free and open source.
